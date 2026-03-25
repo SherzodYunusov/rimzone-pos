@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Sale extends Model
 {
-    protected $fillable = ['customer_id', 'total_price', 'sale_date'];
+    protected $fillable = ['customer_id', 'total_price', 'sale_date', 'payment_method'];
 
     protected $casts = [
         'total_price' => 'decimal:2',

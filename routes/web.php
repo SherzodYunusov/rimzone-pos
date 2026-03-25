@@ -29,3 +29,4 @@ Route::delete('/sales/{sale}', [App\Http\Controllers\SaleController::class, 'des
 
 // Hisobotlar routelari
 Route::get('/reports', [App\Http\Controllers\ReportController::class, 'index']);
+Route::delete('/reports/clear-day', [App\Http\Controllers\ReportController::class, 'clearDay']);

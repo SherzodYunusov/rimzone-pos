@@ -226,13 +226,45 @@
                     <span class="text-sm font-bold text-slate-700">UMUMIY SUMMA:</span>
                     <span class="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent" x-text="formatMoney(cartTotal) + ' so\'m'"></span>
                 </div>
+
+                <!-- To'lov usuli tugmalari -->
+                <div>
+                    <p class="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">To'lov usuli:</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button @click="sellForm.payment_method = 'naqd'"
+                            :class="sellForm.payment_method === 'naqd'
+                                ? 'bg-emerald-600 text-white border-emerald-600 shadow-md ring-2 ring-emerald-300'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-emerald-400 hover:text-emerald-700'"
+                            class="py-2.5 text-xs font-bold rounded-xl border transition-all flex flex-col items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                            Naqd
+                        </button>
+                        <button @click="sellForm.payment_method = 'karta'"
+                            :class="sellForm.payment_method === 'karta'
+                                ? 'bg-blue-600 text-white border-blue-600 shadow-md ring-2 ring-blue-300'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-blue-400 hover:text-blue-700'"
+                            class="py-2.5 text-xs font-bold rounded-xl border transition-all flex flex-col items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                            Karta
+                        </button>
+                        <button @click="sellForm.payment_method = 'nasiya'"
+                            :class="sellForm.payment_method === 'nasiya'
+                                ? 'bg-orange-500 text-white border-orange-500 shadow-md ring-2 ring-orange-300'
+                                : 'bg-white text-slate-600 border-slate-200 hover:border-orange-400 hover:text-orange-700'"
+                            class="py-2.5 text-xs font-bold rounded-xl border transition-all flex flex-col items-center gap-1">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            Nasiya
+                        </button>
+                    </div>
+                </div>
+
                 <button @click="openSellModal()"
-                    :disabled="cart.length === 0"
+                    :disabled="cart.length === 0 || !sellForm.payment_method"
                     class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-400/40 disabled:shadow-none">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
-                    TASDIQLASH
+                    <span x-text="sellForm.payment_method ? 'TASDIQLASH' : 'To\'lov usulini tanlang'"></span>
                 </button>
             </div>
         </div>
@@ -285,6 +317,11 @@
                                         <span class="text-xs font-bold text-slate-600 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 flex items-center gap-1.5">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                                             <span x-text="formatDate(sale.sale_date)"></span>
+                                        </span>
+                                        <!-- To'lov usuli badge -->
+                                        <span class="text-xs font-bold px-2.5 py-1 rounded-lg border"
+                                              :class="sale.payment_method === 'nasiya' ? 'bg-orange-50 text-orange-700 border-orange-200' : sale.payment_method === 'karta' ? 'bg-blue-50 text-blue-700 border-blue-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                                              x-text="sale.payment_method === 'nasiya' ? '📋 Nasiya' : sale.payment_method === 'karta' ? '💳 Karta' : '💵 Naqd'">
                                         </span>
                                     </div>
                                     <h3 class="text-base font-bold text-slate-900 mb-1 truncate" x-text="sale.customer ? sale.customer.name : '👤 Umumiy Mijoz'"></h3>
@@ -370,19 +407,40 @@
 
             <!-- Form -->
             <div class="p-6 space-y-4">
+
+                <!-- Tanlangan to'lov usuli (readonly ko'rsatish) -->
+                <div class="flex items-center gap-3 p-3 rounded-xl border"
+                     :class="sellForm.payment_method === 'naqd' ? 'bg-emerald-50 border-emerald-200' : sellForm.payment_method === 'karta' ? 'bg-blue-50 border-blue-200' : 'bg-orange-50 border-orange-200'">
+                    <span class="text-xs font-bold text-slate-500 uppercase">To'lov usuli:</span>
+                    <span class="text-sm font-black"
+                          :class="sellForm.payment_method === 'naqd' ? 'text-emerald-700' : sellForm.payment_method === 'karta' ? 'text-blue-700' : 'text-orange-700'"
+                          x-text="sellForm.payment_method === 'naqd' ? '💵 Naqd pul' : sellForm.payment_method === 'karta' ? '💳 Karta' : '📋 Nasiya'"></span>
+                </div>
+
                 <!-- Customer selector -->
                 <div x-show="!showNewCustomerForm">
                     <div class="flex items-center justify-between mb-2">
-                        <label class="block text-xs font-bold text-slate-700 uppercase">Mijoz (ixtiyoriy)</label>
+                        <label class="block text-xs font-bold uppercase"
+                               :class="sellForm.payment_method === 'nasiya' ? 'text-orange-600' : 'text-slate-700'">
+                            Mijoz
+                            <span x-text="sellForm.payment_method === 'nasiya' ? '(NASIYA — MAJBURIY!)' : '(ixtiyoriy)'"></span>
+                        </label>
                         <button type="button" @click="showNewCustomerForm = true" class="text-xs font-bold text-blue-600 hover:text-blue-700 transition">+ Yangi</button>
                     </div>
                     <select x-model="sellForm.customer_id"
-                        class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-700 bg-white shadow-sm">
+                        :class="sellForm.payment_method === 'nasiya' && !sellForm.customer_id ? 'border-orange-400 ring-2 ring-orange-200' : 'border-slate-300'"
+                        class="w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-700 bg-white shadow-sm">
                         <option value="">👤 Tanlash shart emas...</option>
                         <template x-for="customer in customers" :key="customer.id">
                             <option :value="customer.id" x-text="`${customer.name} (${customer.company_name})`"></option>
                         </template>
                     </select>
+                    <!-- Nasiya ogohlantirish -->
+                    <p x-show="sellForm.payment_method === 'nasiya' && !sellForm.customer_id"
+                       class="mt-1.5 text-xs font-semibold text-orange-600 flex items-center gap-1">
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                        Nasiya uchun mijoz tanlash shart!
+                    </p>
                 </div>
 
                 <!-- New Customer Form -->
@@ -459,7 +517,7 @@ function posApp() {
         loading: false,
         pulseCart: false,
 
-        sellForm: { customer_id: '', sale_date: '' },
+        sellForm: { customer_id: '', sale_date: '', payment_method: '' },
         sellErrors: {},
 
         showNewCustomerForm: false,
@@ -530,18 +588,28 @@ function posApp() {
             this.showNewCustomerForm = false;
             this.isSellOpen = true;
         },
+
         
         confirmSell() {
             this.sellErrors = {};
-            if (!this.sellForm.sale_date) { 
-                this.showNotif('Sanani tanlang!', 'error'); 
-                return; 
+            if (!this.sellForm.sale_date) {
+                this.showNotif('Sanani tanlang!', 'error');
+                return;
+            }
+            if (!this.sellForm.payment_method) {
+                this.showNotif("To'lov usulini tanlang (Naqd, Karta yoki Nasiya)!", 'error');
+                return;
+            }
+            if (this.sellForm.payment_method === 'nasiya' && !this.sellForm.customer_id) {
+                this.showNotif("Nasiya uchun mijoz tanlash shart! Iltimos, mijozni tanlang.", 'error');
+                return;
             }
             this.loading = true;
 
             const payload = {
-                customer_id: this.sellForm.customer_id || null,
-                sale_date: this.sellForm.sale_date,
+                customer_id:    this.sellForm.customer_id || null,
+                sale_date:      this.sellForm.sale_date,
+                payment_method: this.sellForm.payment_method,
                 items: this.cart.map(i => ({ product_id: i.id, quantity: i.qty }))
             };
 

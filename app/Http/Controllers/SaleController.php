@@ -29,10 +29,19 @@ class SaleController extends Controller
         $data = $request->validate([
             'customer_id'        => 'nullable|exists:customers,id',
             'sale_date'          => 'required|date',
+            'payment_method'     => 'required|in:naqd,karta,nasiya',
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
         ]);
+
+        // Nasiya uchun mijoz tanlash majburiy
+        if ($data['payment_method'] === 'nasiya' && empty($data['customer_id'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nasiya to\'lovida mijoz tanlash shart! Iltimos, mijozni tanlang yoki yangi mijoz qo\'shing.',
+            ], 422);
+        }
 
         try {
             // &$sale o'rniga DB::transaction dan qaytaramiz (to'g'ri usul)
@@ -55,14 +64,16 @@ class SaleController extends Controller
                         'product'    => $product,
                         'quantity'   => (int) $item['quantity'],
                         'unit_price' => (float) $product->price,
+                        'cost_price' => $product->cost_price ? (float) $product->cost_price : null,
                     ];
                     $totalPrice += $product->price * $item['quantity'];
                 }
 
                 $sale = Sale::create([
-                    'customer_id' => $data['customer_id'] ?? null,
-                    'total_price' => $totalPrice,
-                    'sale_date'   => $data['sale_date'],
+                    'customer_id'    => $data['customer_id'] ?? null,
+                    'total_price'    => $totalPrice,
+                    'sale_date'      => $data['sale_date'],
+                    'payment_method' => $data['payment_method'],
                 ]);
 
                 foreach ($lines as $line) {
@@ -70,6 +81,7 @@ class SaleController extends Controller
                         'product_id' => $line['product']->id,
                         'quantity'   => $line['quantity'],
                         'unit_price' => $line['unit_price'],
+                        'cost_price' => $line['cost_price'],
                     ]);
 
                     $line['product']->decrement('quantity', $line['quantity']);

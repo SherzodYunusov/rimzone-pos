@@ -1,11 +1,41 @@
 @extends('layouts.app')
 @section('title', 'Ombor')
 
+@section('head')
+<style>
+    @keyframes cardIn {
+        from { opacity: 0; transform: translateY(14px) scale(0.98); }
+        to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    .card-enter { animation: cardIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+    .card-enter:nth-child(1)  { animation-delay: 0.02s; }
+    .card-enter:nth-child(2)  { animation-delay: 0.06s; }
+    .card-enter:nth-child(3)  { animation-delay: 0.10s; }
+    .card-enter:nth-child(4)  { animation-delay: 0.14s; }
+    .card-enter:nth-child(5)  { animation-delay: 0.18s; }
+    .card-enter:nth-child(6)  { animation-delay: 0.22s; }
+    .card-enter:nth-child(7)  { animation-delay: 0.26s; }
+    .card-enter:nth-child(8)  { animation-delay: 0.30s; }
+    .card-enter:nth-child(n+9){ animation-delay: 0.34s; }
+
+    .product-card {
+        transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                    box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1),
+                    border-color 0.25s ease;
+    }
+    .product-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 28px -6px rgba(37, 99, 235, 0.13);
+        border-color: rgba(147, 197, 253, 0.7);
+    }
+</style>
+@endsection
+
 @section('content')
 <div x-data="productApp()">
 
     <!-- Page Header -->
-    <div class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
+    <div class="h-16 bg-gradient-to-r from-white via-white to-blue-50/50 border-b border-slate-200 flex items-center justify-between px-8">
         <div>
             <h1 class="text-lg font-semibold text-slate-800">Ombor</h1>
             <p class="text-xs text-slate-400" x-text="`${filteredProducts.length} ta mahsulot`"></p>
@@ -13,7 +43,7 @@
         <div class="flex items-center gap-3">
             <div class="hidden md:flex items-center bg-slate-100 rounded-lg p-1 gap-1">
                 <button @click="filterType = 'all'" :class="filterType === 'all' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-3 py-1.5 text-xs font-medium rounded-md transition-all">Barchasi</button>
-                <button @click="filterType = 'low'" :class="filterType === 'low' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-3 py-1.5 text-xs font-medium rounded-md transition-all">Kam qoldi (<5)</button>
+                <button @click="filterType = 'low'" :class="filterType === 'low' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-3 py-1.5 text-xs font-medium rounded-md transition-all">Kam qoldi (&lt;5)</button>
                 <button @click="filterType = 'out'" :class="filterType === 'out' ? 'bg-white text-red-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-3 py-1.5 text-xs font-medium rounded-md transition-all">Tugagan (0)</button>
             </div>
 
@@ -69,7 +99,7 @@
         <!-- Products Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             <template x-for="product in filteredProducts" :key="product.id">
-                <div class="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 flex flex-col overflow-hidden">
+                <div class="product-card card-enter bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
                     <!-- Top bar - priority indicator -->
                     <div class="flex items-center justify-between px-4 pt-4 pb-2" :class="parseInt(product.quantity) === 0 ? 'opacity-70' : ''">
                         <span class="text-sm font-semibold text-slate-800 truncate" x-text="product.name"></span>
@@ -97,15 +127,27 @@
                             <span class="text-xs text-slate-400">Narxi</span>
                             <span class="text-sm font-semibold text-slate-700" x-text="parseFloat(product.price).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m'"></span>
                         </div>
+                        <template x-if="product.cost_price && parseFloat(product.cost_price) > 0">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs text-slate-400">Tannarx</span>
+                                <span class="text-xs font-medium text-slate-500" x-text="parseFloat(product.cost_price).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m'"></span>
+                            </div>
+                        </template>
                         <div class="flex items-center justify-between">
                             <span class="text-xs text-slate-400">Qoldiq</span>
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border"
-                                  :class="parseInt(product.quantity) === 0
-                                    ? 'bg-red-50 text-red-700 border-red-200'
-                                    : parseInt(product.quantity) < 5
-                                      ? 'bg-amber-50 text-amber-700 border-amber-200'
-                                      : 'bg-blue-50 text-blue-700 border-blue-100'"
-                                  x-text="product.quantity + ' dona'"></span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border"
+                                      :class="parseInt(product.quantity) === 0
+                                        ? 'bg-red-50 text-red-700 border-red-200'
+                                        : parseInt(product.quantity) < 5
+                                          ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                          : 'bg-blue-50 text-blue-700 border-blue-100'"
+                                      x-text="product.quantity + ' dona'"></span>
+                                <template x-if="product.unit_type && product.unit_value">
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200"
+                                          x-text="product.unit_value + ' ' + product.unit_type"></span>
+                                </template>
+                            </div>
                         </div>
                         <template x-if="product.description">
                             <p class="text-xs text-slate-400 pt-1 border-t border-slate-100 leading-relaxed" x-text="product.description"></p>
@@ -155,19 +197,19 @@
     <!-- ===== ADD / EDIT MODAL ===== -->
     <div x-show="isModalOpen" style="display:none"
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
-         x-transition:enter="transition ease-out duration-300" 
-         x-transition:enter-start="opacity-0" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200" 
-         x-transition:leave-start="opacity-100" 
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
         <div @click.outside="closeModal()" @click.stop
              class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden"
-             x-transition:enter="transition ease-out duration-300" 
-             x-transition:enter-start="opacity-0 scale-90 translate-y-4" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-90 translate-y-4"
              x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-200" 
-             x-transition:leave-start="opacity-100 scale-100 translate-y-0" 
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
              x-transition:leave-end="opacity-0 scale-90 translate-y-4">
 
             <!-- Header -->
@@ -181,27 +223,52 @@
             </div>
 
             <!-- Body -->
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1.5">Mahsulot nomi <span class="text-red-500">*</span></label>
-                    <input type="text" x-model="form.name" placeholder="Masalan: iPhone 15..."
+                    <input type="text" x-model="form.name" placeholder="Masalan: Shampun..."
                         class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400">
                     <p x-show="errors.name" class="text-red-500 text-xs mt-1" x-text="errors.name"></p>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1.5">Narxi (so'm) <span class="text-red-500">*</span></label>
+                        <label class="block text-xs font-medium text-slate-600 mb-1.5">Sotish narxi (so'm) <span class="text-red-500">*</span></label>
                         <input type="number" step="0.01" x-model="form.price" placeholder="0"
                             class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
                         <p x-show="errors.price" class="text-red-500 text-xs mt-1" x-text="errors.price"></p>
                     </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1.5">Tannarx (so'm) <span class="text-slate-400">(ixtiyoriy)</span></label>
+                        <input type="number" step="0.01" x-model="form.cost_price" placeholder="0"
+                            class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1.5">Soni (dona) <span class="text-red-500">*</span></label>
                         <input type="number" x-model="form.quantity" placeholder="0"
                             class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
                         <p x-show="errors.quantity" class="text-red-500 text-xs mt-1" x-text="errors.quantity"></p>
                     </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1.5">O'lchov turi <span class="text-slate-400">(ixtiyoriy)</span></label>
+                        <select x-model="form.unit_type"
+                            class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 bg-white">
+                            <option value="">— yo'q —</option>
+                            <option value="kg">kg</option>
+                            <option value="litr">litr</option>
+                        </select>
+                    </div>
                 </div>
+                <template x-if="form.unit_type === 'kg' || form.unit_type === 'litr'">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-600 mb-1.5">
+                            Miqdor (<span x-text="form.unit_type"></span>) <span class="text-slate-400">(ixtiyoriy)</span>
+                        </label>
+                        <input type="number" step="0.001" x-model="form.unit_value" placeholder="0.000"
+                            class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
+                    </div>
+                </template>
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1.5">Tavsif <span class="text-slate-400">(ixtiyoriy)</span></label>
                     <textarea x-model="form.description" placeholder="Mahsulot haqida qisqacha..."
@@ -262,7 +329,7 @@ function productApp() {
         editingId: null,
         selectedProductId: null,
         searchTerm: '',
-        form: { name: '', price: '', quantity: '', description: '' },
+        form: { name: '', price: '', cost_price: '', quantity: '', unit_type: '', unit_value: '', description: '' },
         errors: {},
         filterType: 'all',
 
@@ -279,21 +346,33 @@ function productApp() {
 
         openNewModal() {
             this.editingId = null;
-            this.form = { name: '', price: '', quantity: '', description: '' };
+            this.form = { name: '', price: '', cost_price: '', quantity: '', unit_type: '', unit_value: '', description: '' };
             this.errors = {};
             this.isModalOpen = true;
         },
 
         editProduct(product) {
             this.editingId = product.id;
-            this.form = { name: product.name, price: product.price, quantity: product.quantity, description: product.description };
+            this.form = {
+                name: product.name,
+                price: product.price,
+                cost_price: product.cost_price || '',
+                quantity: product.quantity,
+                unit_type: product.unit_type || '',
+                unit_value: product.unit_value || '',
+                description: product.description || ''
+            };
             this.errors = {};
             this.isModalOpen = true;
         },
 
         closeModal() {
             this.isModalOpen = false;
-            setTimeout(() => { this.editingId = null; this.form = { name:'',price:'',quantity:'',description:'' }; this.errors={}; }, 200);
+            setTimeout(() => {
+                this.editingId = null;
+                this.form = { name: '', price: '', cost_price: '', quantity: '', unit_type: '', unit_value: '', description: '' };
+                this.errors = {};
+            }, 200);
         },
 
         deleteProduct(id) { this.deleteProductId = id; this.isDeleteModalOpen = true; },
@@ -302,21 +381,21 @@ function productApp() {
         confirmDelete() {
             fetch(`/products/${this.deleteProductId}`, {
                 method: 'DELETE',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 }
             }).then(async r => {
                 const data = await r.json();
                 if (!r.ok) throw new Error(data.message || 'Xatolik yuz berdi');
                 return data;
             }).then(data => {
-                if (data.success) { 
-                    this.products = this.products.filter(p => p.id !== this.deleteProductId); 
-                    this.isDeleteModalOpen = false; 
-                    this.deleteProductId = null; 
-                    this.showNotif(data.message, 'success'); 
+                if (data.success) {
+                    this.products = this.products.filter(p => p.id !== this.deleteProductId);
+                    this.isDeleteModalOpen = false;
+                    this.deleteProductId = null;
+                    this.showNotif(data.message, 'success');
                 }
             }).catch(e => this.showNotif(e.message, 'error'));
         },
@@ -327,10 +406,10 @@ function productApp() {
             const method = this.editingId ? 'PUT' : 'POST';
             fetch(url, {
                 method,
-                headers: { 
-                    'Content-Type': 'application/json', 
+                headers: {
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify(this.form)
             }).then(async r => {
@@ -343,11 +422,11 @@ function productApp() {
                 return data;
             }).then(data => {
                 if (data.success) {
-                    if (this.editingId) { 
-                        const idx = this.products.findIndex(p => p.id === this.editingId); 
-                        if (idx !== -1) this.products[idx] = data.product; 
-                    } else  { 
-                        this.products.unshift(data.product); 
+                    if (this.editingId) {
+                        const idx = this.products.findIndex(p => p.id === this.editingId);
+                        if (idx !== -1) this.products[idx] = data.product;
+                    } else {
+                        this.products.unshift(data.product);
                     }
                     this.closeModal();
                     this.showNotif(data.message, 'success');
@@ -378,20 +457,19 @@ function productApp() {
         showNotif(msg, type) {
             const el = document.createElement('div');
             el.className = `fixed bottom-8 right-8 px-6 py-4 rounded-2xl border shadow-2xl text-sm font-bold z-[9999] transition-all duration-500 transform translate-y-20 opacity-0 flex items-center gap-3 min-w-[300px] ${type === 'success' ? 'bg-white border-emerald-100 text-emerald-700' : 'bg-white border-red-100 text-red-600'}`;
-            
-            const icon = type === 'success' 
+
+            const icon = type === 'success'
                 ? '<svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>'
                 : '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>';
-            
+
             el.innerHTML = `${icon} <span>${msg}</span>`;
             document.body.appendChild(el);
-            
-            // Trigger animation
+
             setTimeout(() => { el.classList.remove('translate-y-20', 'opacity-0'); }, 10);
-            
-            setTimeout(() => { 
+
+            setTimeout(() => {
                 el.classList.add('translate-y-20', 'opacity-0');
-                setTimeout(() => el.remove(), 500); 
+                setTimeout(() => el.remove(), 500);
             }, 4000);
         }
     }

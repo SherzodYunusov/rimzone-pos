@@ -9,11 +9,13 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'price', 'quantity', 'description'];
+    protected $fillable = ['name', 'price', 'cost_price', 'quantity', 'unit_type', 'unit_value', 'description'];
 
     protected $casts = [
-        'price'    => 'decimal:2',
-        'quantity' => 'integer',
+        'price'      => 'decimal:2',
+        'cost_price' => 'decimal:2',
+        'unit_value' => 'decimal:3',
+        'quantity'   => 'integer',
     ];
 
     /** Ushbu mahsulot bo'yicha barcha sotuv elementlari */

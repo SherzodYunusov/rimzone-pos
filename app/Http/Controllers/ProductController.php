@@ -22,13 +22,15 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
+            'name'        => 'required|string|max:255',
+            'price'       => 'required|numeric|min:0',
+            'cost_price'  => 'nullable|numeric|min:0',
+            'quantity'    => 'required|integer|min:0',
+            'unit_type'   => 'nullable|in:kg,litr',
+            'unit_value'  => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 
-        // Mahsulot nomini katta harflarga aylantir
         $validated['name'] = strtoupper($validated['name']);
 
         $product = Product::create($validated);
@@ -54,13 +56,15 @@ class ProductController extends Controller
     public function update(Request $request, Product $product)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'price' => 'required|numeric|min:0',
-            'quantity' => 'required|integer|min:0',
+            'name'        => 'required|string|max:255',
+            'price'       => 'required|numeric|min:0',
+            'cost_price'  => 'nullable|numeric|min:0',
+            'quantity'    => 'required|integer|min:0',
+            'unit_type'   => 'nullable|in:kg,litr',
+            'unit_value'  => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
         ]);
 
-        // Mahsulot nomini katta harflarga aylantir
         $validated['name'] = strtoupper($validated['name']);
 
         $product->update($validated);
