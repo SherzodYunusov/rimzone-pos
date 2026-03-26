@@ -12,6 +12,14 @@ class Customer extends Model
         'address',
         'company_name',
         'photo',
+        'lat',
+        'lng',
+        'map_link',
+    ];
+
+    protected $casts = [
+        'lat' => 'float',
+        'lng' => 'float',
     ];
 
     public function sales()

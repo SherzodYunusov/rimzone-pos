@@ -67,6 +67,32 @@
     }
 
     [x-cloak] { display: none !important; }
+
+    /* ── Mobile: cart becomes a slide-up bottom sheet ────────── */
+    @media (max-width: 767px) {
+        .pos-right {
+            position: fixed !important;
+            left: 0; right: 0; bottom: 0;
+            width: 100% !important;
+            height: 90dvh !important;
+            z-index: 200;
+            border-radius: 1.25rem 1.25rem 0 0;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+            transform: translateY(100%);
+            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+        .pos-right.mobile-open {
+            transform: translateY(0);
+        }
+        /* drag handle */
+        .pos-drag-handle { display: block; }
+    }
+    @media (min-width: 768px) {
+        .pos-right { transform: none !important; }
+        .pos-drag-handle { display: none; }
+        .pos-mobile-bar { display: none !important; }
+    }
 </style>
 @endsection
 
@@ -74,18 +100,18 @@
 <div x-data="posApp()" x-cloak>
 
     <!-- ── TOP BAR ─────────────────────────────────────────────── -->
-    <div class="h-16 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200 flex items-center justify-between px-6 shrink-0 z-10 sticky top-0">
-        <div class="flex items-center gap-4">
-            <h1 class="text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">POS — Savdo Tizimi</h1>
-            <span class="px-3 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200 transition-all duration-300 animate-pulse-soft"
+    <div class="h-14 md:h-16 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0 z-10 sticky top-0">
+        <div class="flex items-center gap-3">
+            <h1 class="text-base md:text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">POS</h1>
+            <span class="px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200 transition-all duration-300 animate-pulse-soft"
                   :class="pulseCart ? 'active bg-blue-100 ring-2 ring-blue-300 shadow-lg shadow-blue-200' : ''"
-                  x-text="cartCount + ' (dan)'"></span>
+                  x-text="cartCount + ' dona'"></span>
         </div>
-        
+
         <button type="button" @click="isHistoryOpen = true"
-            class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-all flex items-center gap-2 border border-slate-200 shadow-sm hover:shadow-md hover:shadow-blue-100">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            Hisobot
+            class="p-2 md:px-4 md:py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-all flex items-center gap-2 border border-slate-200 shadow-sm">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="hidden md:inline">Hisobot</span>
         </button>
     </div>
 
@@ -107,7 +133,7 @@
             </div>
 
             <!-- Product Grid -->
-            <div class="flex-1 overflow-y-auto p-4">
+            <div class="flex-1 overflow-y-auto p-4 pb-24 md:pb-4">
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
                     <template x-for="(product, idx) in filteredProducts" :key="product.id">
                         <div class="product-card animate-fade-up rounded-xl p-4 flex flex-col gap-3 cursor-pointer"
@@ -164,20 +190,36 @@
             </div>
         </div>
 
-        <!-- RIGHT: Cart sidebar -->
-        <div class="w-80 xl:w-96 bg-gradient-to-b from-white to-slate-50 flex flex-col pos-right shrink-0 border-l border-slate-200">
+        <!-- RIGHT: Cart sidebar / mobile bottom sheet -->
+        <div class="w-80 xl:w-96 bg-gradient-to-b from-white to-slate-50 flex flex-col pos-right shrink-0 border-l border-slate-200"
+             :class="showCartMobile ? 'mobile-open' : ''">
+
+            <!-- Drag handle (mobile only) -->
+            <div class="pos-drag-handle flex justify-center pt-3 pb-1 cursor-pointer bg-white" @click="showCartMobile = false">
+                <div class="w-10 h-1.5 rounded-full bg-slate-300"></div>
+            </div>
+
             <!-- Cart header -->
-            <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between bg-white shadow-sm">
-                <h2 class="font-bold text-slate-800 flex items-center gap-2 text-lg">
+            <div class="px-5 py-3 md:py-4 border-b border-slate-200 flex items-center justify-between bg-white shadow-sm">
+                <h2 class="font-bold text-slate-800 flex items-center gap-2 text-base md:text-lg">
                     <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-. 9-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zM7.17 11.5h11.66c.49 0 .95-.25 1.23-.64l3.57-5.95c.12-.22.2-.49.2-.8 0-1.1-.9-2-2-2H5.21l-.94-2H2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-5.95c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l2.17-3.76z"/>
+                        <path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zm10 0c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2zM7.17 14.5h11.66c.49 0 .95-.25 1.23-.64l3.57-5.95c.12-.22.2-.49.2-.8 0-1.1-.9-2-2-2H5.21l-.94-2H2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63z"/>
                     </svg>
-                    Savatchasi
+                    Savatcha
                 </h2>
-                <button x-show="cart.length > 0" @click="clearCart()"
-                    class="text-xs text-slate-400 hover:text-red-600 transition-colors font-bold hover:bg-red-50 px-2 py-1 rounded-lg">
-                    Tozalash
-                </button>
+                <div class="flex items-center gap-2">
+                    <button x-show="cart.length > 0" @click="clearCart()"
+                        class="text-xs text-slate-400 hover:text-red-600 transition-colors font-bold hover:bg-red-50 px-2 py-1 rounded-lg">
+                        Tozalash
+                    </button>
+                    <!-- Mobile close button -->
+                    <button class="md:hidden p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+                            @click="showCartMobile = false">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
             </div>
 
             <!-- Cart items scroll area -->
@@ -268,6 +310,55 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <!-- ── MOBILE: Cart backdrop ───────────────────────────────── -->
+    <div x-show="showCartMobile" style="display:none"
+         class="md:hidden fixed inset-0 z-[199] bg-slate-900/40 backdrop-blur-sm"
+         x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+         @click="showCartMobile = false">
+    </div>
+
+    <!-- ── MOBILE: Floating bottom bar ─────────────────────────── -->
+    <div class="pos-mobile-bar fixed bottom-0 left-0 right-0 z-[150] md:hidden bg-white border-t border-slate-200 px-4 py-3 flex items-center gap-3">
+        <div class="flex-1 min-w-0">
+            <p class="text-[10px] text-slate-400 font-medium uppercase">Savatcha</p>
+            <p class="text-base font-black text-blue-700 leading-tight" x-text="cartTotal > 0 ? formatMoney(cartTotal) + ' so\'m' : 'Bo\'sh'"></p>
+        </div>
+        <!-- Pay method quick select -->
+        <div class="flex gap-1.5">
+            <button @click="sellForm.payment_method = 'naqd'"
+                :class="sellForm.payment_method === 'naqd' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-200'"
+                class="px-2.5 py-2 text-[11px] font-bold rounded-lg border transition-all">Naqd</button>
+            <button @click="sellForm.payment_method = 'karta'"
+                :class="sellForm.payment_method === 'karta' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-slate-200'"
+                class="px-2.5 py-2 text-[11px] font-bold rounded-lg border transition-all">Karta</button>
+            <button @click="sellForm.payment_method = 'nasiya'"
+                :class="sellForm.payment_method === 'nasiya' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-slate-500 border-slate-200'"
+                class="px-2.5 py-2 text-[11px] font-bold rounded-lg border transition-all">Nasiya</button>
+        </div>
+        <!-- Cart toggle / checkout button -->
+        <template x-if="cart.length === 0">
+            <button class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-400 rounded-xl font-bold text-sm" disabled>
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5"/></svg>
+                Savatcha
+            </button>
+        </template>
+        <template x-if="cart.length > 0 && !sellForm.payment_method">
+            <button @click="showCartMobile = true"
+                class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5"/></svg>
+                <span x-text="cartCount"></span>
+            </button>
+        </template>
+        <template x-if="cart.length > 0 && sellForm.payment_method">
+            <button @click="openSellModal()"
+                class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Sotish
+            </button>
+        </template>
     </div>
 
     <!-- ── HISTORY/REPORT MODAL ────────────────────────────────── -->
@@ -528,6 +619,7 @@ function posApp() {
         isDeletingId: null,
         loading: false,
         pulseCart: false,
+        showCartMobile: false,
 
         sellForm: { customer_id: '', sale_date: '', payment_method: '', due_date: '' },
         sellErrors: {},

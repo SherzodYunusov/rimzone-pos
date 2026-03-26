@@ -1,8 +1,13 @@
 @extends('layouts.app')
 @section('title', 'Mijozlar')
 
+@section('head')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/sp38=" crossorigin=""></script>
+@endsection
+
 @section('content')
-<div x-data="customerApp()">
+<div x-data="customerApp()" x-init="init()">
 
     <!-- Page Header -->
     <div class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
@@ -46,13 +51,31 @@
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col"
                      :style="`animation: fadeInUp .3s ease both; animation-delay: ${index * 40}ms`">
 
-                    <!-- Avatar / Photo area -->
-                    <div class="relative h-24 bg-slate-50 flex-shrink-0 overflow-hidden">
-                        <template x-if="customer.photo_url">
-                            <img :src="customer.photo_url" class="w-full h-full object-cover">
+                    <!-- Avatar / Photo / Map area -->
+                    <div class="relative flex-shrink-0 overflow-hidden bg-slate-50">
+                        <!-- Leaflet mini-map (when lat/lng exist) -->
+                        <template x-if="customer.lat && customer.lng">
+                            <div>
+                                <div :id="`map-${customer.id}`" class="w-full" style="height:120px; z-index:0;"></div>
+                                <a :href="`https://www.google.com/maps/dir/?api=1&destination=${customer.lat},${customer.lng}`"
+                                   target="_blank"
+                                   class="absolute bottom-2 right-2 z-10 inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-lg transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0zM15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    Navigatsiya
+                                </a>
+                            </div>
                         </template>
-                        <template x-if="!customer.photo_url">
-                            <div class="w-full h-full flex items-center justify-center">
+                        <!-- Photo (when no geo but photo exists) -->
+                        <template x-if="!customer.lat && customer.photo_url">
+                            <div class="h-24">
+                                <img :src="customer.photo_url" class="w-full h-full object-cover">
+                            </div>
+                        </template>
+                        <!-- Avatar fallback -->
+                        <template x-if="!customer.lat && !customer.photo_url">
+                            <div class="h-24 flex items-center justify-center">
                                 <div class="w-14 h-14 rounded-xl bg-blue-100 flex items-center justify-center">
                                     <span class="text-2xl font-bold text-blue-600" x-text="customer.name.charAt(0).toUpperCase()"></span>
                                 </div>
@@ -66,7 +89,7 @@
                             <h3 class="font-bold text-slate-800" x-text="customer.name"></h3>
                             <p class="text-[11px] font-bold text-blue-600 uppercase tracking-wider mt-0.5" x-text="customer.company_name"></p>
                         </div>
-                        
+
                         <div class="space-y-2">
                             <div class="flex items-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-100 group/item hover:bg-white hover:border-blue-200 transition-all">
                                 <div class="w-8 h-8 rounded-lg bg-white shadow-sm flex items-center justify-center text-slate-400 group-hover/item:text-blue-500">
@@ -113,22 +136,22 @@
     <!-- ===== ADD / EDIT MODAL ===== -->
     <div x-show="isFormOpen" style="display:none"
          class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm"
-         x-transition:enter="transition ease-out duration-300" 
-         x-transition:enter-start="opacity-0" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200" 
-         x-transition:leave-start="opacity-100" 
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
         <div @click.outside="closeForm()" @click.stop
-             class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden"
-             x-transition:enter="transition ease-out duration-300" 
-             x-transition:enter-start="opacity-0 scale-90 translate-y-4" 
+             class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden max-h-[90vh] flex flex-col"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-90 translate-y-4"
              x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-             x-transition:leave="transition ease-in duration-200" 
-             x-transition:leave-start="opacity-100 scale-100 translate-y-0" 
+             x-transition:leave="transition ease-in duration-200"
+             x-transition:leave-start="opacity-100 scale-100 translate-y-0"
              x-transition:leave-end="opacity-0 scale-90 translate-y-4">
 
-            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+            <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 flex-shrink-0">
                 <h2 class="font-semibold text-slate-800" x-text="editingId ? 'Mijozni tahrirlash' : 'Yangi mijoz qo\'shish'"></h2>
                 <button @click="closeForm()" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +160,7 @@
                 </button>
             </div>
 
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-4 overflow-y-auto">
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1.5">Ismi <span class="text-red-500">*</span></label>
@@ -166,6 +189,39 @@
                         <p x-show="errors.company_name" class="text-red-500 text-xs mt-1" x-text="errors.company_name"></p>
                     </div>
                 </div>
+
+                <!-- Google Maps Link input -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1.5">
+                        Google Maps Linkini tashlang
+                        <span class="text-slate-400">(ixtiyoriy — joylashuv avtomatik aniqlanadi)</span>
+                    </label>
+                    <div class="relative">
+                        <input type="url" x-model="form.map_link" @input="parseMapLink($event.target.value)"
+                               placeholder="https://maps.google.com/..."
+                               class="w-full px-3 py-2.5 pr-10 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400">
+                        <div x-show="form.lat && form.lng" class="absolute right-3 top-1/2 -translate-y-1/2">
+                            <svg class="w-4 h-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <!-- Parsed coords display -->
+                    <div x-show="form.lat && form.lng" class="mt-2 flex items-center gap-2 text-xs text-emerald-600 font-medium">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        </svg>
+                        <span x-text="`Koordinatlar: ${Number(form.lat).toFixed(6)}, ${Number(form.lng).toFixed(6)}`"></span>
+                        <button type="button" @click="form.lat=''; form.lng=''; form.map_link=''"
+                                class="ml-auto text-slate-400 hover:text-red-500 transition-colors">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Photo upload -->
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1.5">Rasm <span class="text-slate-400">(ixtiyoriy)</span></label>
                     <div class="flex items-center gap-3">
@@ -186,7 +242,7 @@
                 </div>
             </div>
 
-            <div class="flex gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl">
+            <div class="flex gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl flex-shrink-0">
                 <button @click="closeForm()" class="flex-1 px-4 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">Bekor qilish</button>
                 <button @click="submitForm()" :disabled="loading"
                     class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
@@ -228,8 +284,61 @@
 @section('scripts')
 <style>
 @keyframes fadeInUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+/* Prevent Leaflet tiles from interfering with layout */
+.leaflet-container { font-size: 12px; }
 </style>
 <script>
+// ── Google Maps URL → lat/lng extractor ──────────────────────────────────
+function extractLatLng(url) {
+    if (!url) return null;
+    // Format: /@lat,lng,zoom  (most common share URL)
+    let m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+    // Format: ?q=lat,lng  (simple search/pin URL)
+    m = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+    // Format: !3dlat!4dlng  (place URLs)
+    m = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+    if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+    // Format: ll=lat,lng
+    m = url.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
+    if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+    return null;
+}
+
+// ── Leaflet map registry (id → map instance) ─────────────────────────────
+const _leafletMaps = {};
+
+function initCustomerMap(customerId, lat, lng) {
+    const containerId = `map-${customerId}`;
+    // Destroy existing map if re-rendering
+    if (_leafletMaps[customerId]) {
+        _leafletMaps[customerId].remove();
+        delete _leafletMaps[customerId];
+    }
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const map = L.map(containerId, {
+        zoomControl: false,
+        dragging: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+        touchZoom: false,
+        attributionControl: false,
+    }).setView([lat, lng], 15);
+
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+    const icon = L.divIcon({
+        html: `<div style="width:24px;height:24px;background:#2563eb;border:3px solid white;border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.35);"></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
+        className: '',
+    });
+    L.marker([lat, lng], { icon }).addTo(map);
+    _leafletMaps[customerId] = map;
+}
+
 function customerApp() {
     return {
         customers: {!! json_encode($customers) !!},
@@ -241,8 +350,32 @@ function customerApp() {
         photoPreview: null,
         photoName: null,
         photoFile: null,
-        form: { name: '', phone: '', address: '', company_name: '' },
+        form: { name: '', phone: '', address: '', company_name: '', map_link: '', lat: '', lng: '' },
         errors: {},
+
+        init() {
+            // Render maps for all customers that have coordinates
+            this.$nextTick(() => this.renderAllMaps());
+        },
+
+        renderAllMaps() {
+            this.customers.forEach(c => {
+                if (c.lat && c.lng) {
+                    this.$nextTick(() => initCustomerMap(c.id, c.lat, c.lng));
+                }
+            });
+        },
+
+        parseMapLink(url) {
+            const coords = extractLatLng(url);
+            if (coords) {
+                this.form.lat = coords.lat;
+                this.form.lng = coords.lng;
+            } else {
+                this.form.lat = '';
+                this.form.lng = '';
+            }
+        },
 
         handlePhoto(event) {
             const file = event.target.files[0];
@@ -254,8 +387,30 @@ function customerApp() {
             reader.readAsDataURL(file);
         },
         resetPhoto() { this.photoPreview = null; this.photoName = null; this.photoFile = null; const inp = document.getElementById('photoInput'); if (inp) inp.value = ''; },
-        openAddModal() { this.editingId = null; this.form = { name:'',phone:'',address:'',company_name:'' }; this.errors = {}; this.resetPhoto(); this.isFormOpen = true; },
-        openEditModal(customer) { this.editingId = customer.id; this.form = { name: customer.name, phone: customer.phone, address: customer.address, company_name: customer.company_name }; this.errors = {}; this.photoPreview = customer.photo_url || null; this.photoName = null; this.photoFile = null; this.isFormOpen = true; },
+        openAddModal() {
+            this.editingId = null;
+            this.form = { name: '', phone: '', address: '', company_name: '', map_link: '', lat: '', lng: '' };
+            this.errors = {};
+            this.resetPhoto();
+            this.isFormOpen = true;
+        },
+        openEditModal(customer) {
+            this.editingId = customer.id;
+            this.form = {
+                name: customer.name,
+                phone: customer.phone,
+                address: customer.address,
+                company_name: customer.company_name,
+                map_link: customer.map_link || '',
+                lat: customer.lat || '',
+                lng: customer.lng || '',
+            };
+            this.errors = {};
+            this.photoPreview = customer.photo_url || null;
+            this.photoName = null;
+            this.photoFile = null;
+            this.isFormOpen = true;
+        },
         closeForm() { this.isFormOpen = false; setTimeout(() => { this.editingId = null; this.errors = {}; this.resetPhoto(); }, 200); },
         submitForm() {
             this.errors = {};
@@ -265,13 +420,19 @@ function customerApp() {
             if (!this.form.company_name.trim()) { this.errors.company_name = 'Majburiy!'; return; }
             this.loading = true;
             const fd = new FormData();
-            fd.append('name', this.form.name); fd.append('phone', this.form.phone); fd.append('address', this.form.address); fd.append('company_name', this.form.company_name);
+            fd.append('name', this.form.name);
+            fd.append('phone', this.form.phone);
+            fd.append('address', this.form.address);
+            fd.append('company_name', this.form.company_name);
+            if (this.form.map_link) fd.append('map_link', this.form.map_link);
+            if (this.form.lat !== '' && this.form.lat !== null) fd.append('lat', this.form.lat);
+            if (this.form.lng !== '' && this.form.lng !== null) fd.append('lng', this.form.lng);
             fd.append('_token', document.querySelector('meta[name="csrf-token"]').content);
             if (this.photoFile) fd.append('photo', this.photoFile);
             const url = this.editingId ? `/customers/${this.editingId}` : '/customers';
             if (this.editingId) fd.append('_method', 'PUT');
-            fetch(url, { 
-                method: 'POST', 
+            fetch(url, {
+                method: 'POST',
                 body: fd,
                 headers: { 'Accept': 'application/json' }
             }).then(async r => {
@@ -284,14 +445,16 @@ function customerApp() {
                 return data;
             }).then(data => {
                 if (data.success) {
-                    if (this.editingId) { 
-                        const idx = this.customers.findIndex(c => c.id === this.editingId); 
-                        if (idx !== -1) this.customers[idx] = data.customer; 
-                    } else { 
-                        this.customers.unshift(data.customer); 
+                    if (this.editingId) {
+                        const idx = this.customers.findIndex(c => c.id === this.editingId);
+                        if (idx !== -1) this.customers[idx] = data.customer;
+                    } else {
+                        this.customers.unshift(data.customer);
                     }
-                    this.closeForm(); 
+                    this.closeForm();
                     this.showNotif(data.message, 'success');
+                    // Re-render maps after DOM updates
+                    this.$nextTick(() => this.renderAllMaps());
                 }
             }).catch(e => {
                 if (e.message !== 'Validation error') this.showNotif(e.message, 'error');
@@ -301,42 +464,37 @@ function customerApp() {
         cancelDelete() { this.isDeleteOpen = false; setTimeout(() => { this.deleteTarget = null; }, 200); },
         confirmDelete() {
             if (!this.deleteTarget) return; this.loading = true; const id = this.deleteTarget.id;
-            fetch(`/customers/${id}`, { 
-                method: 'DELETE', 
-                headers: { 
-                    'Content-Type': 'application/json', 
+            fetch(`/customers/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
-                } 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                }
             }).then(async r => {
                 const data = await r.json();
                 if (!r.ok) throw new Error(data.message || 'Xatolik yuz berdi');
                 return data;
-            }).then(data => { 
-                if (data.success) { 
-                    this.customers = this.customers.filter(c => c.id !== id); 
-                    this.cancelDelete(); 
-                    this.showNotif(data.message, 'success'); 
-                } 
+            }).then(data => {
+                if (data.success) {
+                    this.customers = this.customers.filter(c => c.id !== id);
+                    this.cancelDelete();
+                    this.showNotif(data.message, 'success');
+                }
             }).catch(e => this.showNotif(e.message, 'error')).finally(() => { this.loading = false; });
         },
         showNotif(msg, type) {
             const el = document.createElement('div');
             el.className = `fixed bottom-8 right-8 px-6 py-4 rounded-2xl border shadow-2xl text-sm font-bold z-[9999] transition-all duration-500 transform translate-y-20 opacity-0 flex items-center gap-3 min-w-[300px] ${type === 'success' ? 'bg-white border-emerald-100 text-emerald-700' : 'bg-white border-red-100 text-red-600'}`;
-            
-            const icon = type === 'success' 
+            const icon = type === 'success'
                 ? '<svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>'
                 : '<svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>';
-            
             el.innerHTML = `${icon} <span>${msg}</span>`;
             document.body.appendChild(el);
-            
-            // Trigger animation
             setTimeout(() => { el.classList.remove('translate-y-20', 'opacity-0'); }, 10);
-            
-            setTimeout(() => { 
+            setTimeout(() => {
                 el.classList.add('translate-y-20', 'opacity-0');
-                setTimeout(() => el.remove(), 500); 
+                setTimeout(() => el.remove(), 500);
             }, 4000);
         }
     };
