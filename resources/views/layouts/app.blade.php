@@ -55,13 +55,32 @@
     </style>
     @yield('head')
 </head>
-<body class="bg-slate-50 min-h-screen flex text-slate-700">
+<body class="bg-slate-50 min-h-screen flex text-slate-700" x-data="{ sidebarOpen: false }">
+
+    <!-- Mobile backdrop -->
+    <div x-show="sidebarOpen" x-cloak
+         class="md:hidden fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-sm"
+         @click="sidebarOpen = false"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"></div>
 
     <!-- ===== SIDEBAR ===== -->
-    <aside class="w-64 min-h-screen bg-white border-r border-slate-200 flex flex-col shrink-0">
+    <aside class="fixed md:sticky md:top-0 inset-y-0 left-0 z-50 md:z-auto h-screen w-64 bg-white border-r border-slate-200 flex flex-col shrink-0 transition-transform duration-300 ease-in-out"
+           :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
 
         <!-- Logo -->
         <div class="h-16 flex items-center px-5 border-b border-slate-200">
+            <!-- Mobile close button -->
+            <button @click="sidebarOpen = false"
+                    class="md:hidden mr-3 p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
             <a href="{{ url('/products') }}" class="flex items-center gap-2.5 w-full">
                 <div class="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm shrink-0">
                     <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -142,7 +161,29 @@
     </aside>
 
     <!-- ===== MAIN CONTENT ===== -->
-    <div class="flex-1 flex flex-col min-h-screen overflow-auto page-enter">
+    <div class="flex-1 flex flex-col min-h-screen overflow-auto page-enter min-w-0">
+
+        <!-- Mobile top bar (hamburger + logo) -->
+        <div class="md:hidden sticky top-0 z-30 h-14 bg-white border-b border-slate-200 glass flex items-center px-4 gap-3 shrink-0">
+            <button @click="sidebarOpen = true"
+                    class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
+            <a href="{{ url('/products') }}" class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
+                    <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z"/>
+                        <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <span class="text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">RIMzone</span>
+            </a>
+            <!-- Current page label from yielded title -->
+            <span class="ml-auto text-xs font-semibold text-slate-400 truncate">@yield('title', '')</span>
+        </div>
+
         @yield('content')
     </div>
 

@@ -35,7 +35,7 @@
 <div x-data="productApp()">
 
     <!-- Page Header -->
-    <div class="h-16 bg-gradient-to-r from-white via-white to-blue-50/50 border-b border-slate-200 flex items-center justify-between px-8">
+    <div class="h-14 md:h-16 bg-gradient-to-r from-white via-white to-blue-50/50 border-b border-slate-200 flex items-center justify-between px-4 md:px-8">
         <div>
             <h1 class="text-lg font-semibold text-slate-800">Ombor</h1>
             <p class="text-xs text-slate-400" x-text="`${filteredProducts.length} ta mahsulot`"></p>
@@ -52,20 +52,20 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
                 </svg>
                 <input type="text" x-model="searchTerm" placeholder="Qidirish..."
-                    class="pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400 w-48 xl:w-56">
+                    class="pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400 w-32 sm:w-48 xl:w-56">
             </div>
             <button @click="openNewModal()"
-                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-4 rounded-lg transition-colors shadow-sm">
+                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-3 md:px-4 rounded-lg transition-colors shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                Mahsulot qo'shish
+                <span class="hidden sm:inline">Mahsulot qo'shish</span>
             </button>
         </div>
     </div>
 
     <!-- Main Content -->
-    <main class="p-8">
+    <main class="p-4 md:p-8">
 
         <!-- Search result detail card -->
         <template x-if="selectedProductId">
@@ -233,14 +233,14 @@
             </div>
 
             <!-- Body -->
-            <div class="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div class="p-4 sm:p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1.5">Mahsulot nomi <span class="text-red-500">*</span></label>
                     <input type="text" x-model="form.name" placeholder="Masalan: Shampun..."
                         class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400">
                     <p x-show="errors.name" class="text-red-500 text-xs mt-1" x-text="errors.name"></p>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1.5">Sotish narxi (so'm) <span class="text-red-500">*</span></label>
                         <input type="number" step="0.01" x-model="form.price" placeholder="0"
@@ -253,7 +253,7 @@
                             class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
                     </div>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1.5">Soni (dona) <span class="text-red-500">*</span></label>
                         <input type="number" x-model="form.quantity" placeholder="0"

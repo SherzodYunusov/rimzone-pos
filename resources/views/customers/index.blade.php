@@ -10,22 +10,22 @@
 <div x-data="customerApp()" x-init="init()">
 
     <!-- Page Header -->
-    <div class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8">
+    <div class="h-14 md:h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8">
         <div>
             <h1 class="text-lg font-semibold text-slate-800">Mijozlar</h1>
             <p class="text-xs text-slate-400" x-text="`${customers.length} ta mijoz`"></p>
         </div>
         <button @click="openAddModal()"
-            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-4 rounded-lg transition-colors shadow-sm">
+            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-3 md:px-4 rounded-lg transition-colors shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
             </svg>
-            Mijoz qo'shish
+            <span class="hidden sm:inline">Mijoz qo'shish</span>
         </button>
     </div>
 
     <!-- Main -->
-    <main class="p-8">
+    <main class="p-4 md:p-8">
 
         <!-- Empty state -->
         <div x-show="customers.length === 0" class="flex flex-col items-center justify-center py-24">
@@ -160,8 +160,8 @@
                 </button>
             </div>
 
-            <div class="p-6 space-y-4 overflow-y-auto">
-                <div class="grid grid-cols-2 gap-4">
+            <div class="p-4 sm:p-6 space-y-4 overflow-y-auto">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1.5">Ismi <span class="text-red-500">*</span></label>
                         <input type="text" x-model="form.name" placeholder="To'liq ismi"
