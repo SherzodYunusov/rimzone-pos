@@ -99,16 +99,17 @@
         <!-- Products Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
             <template x-for="product in filteredProducts" :key="product.id">
-                <div class="product-card card-enter bg-white border border-slate-200 rounded-xl shadow-sm flex flex-col overflow-hidden">
+                <div class="product-card card-enter bg-white rounded-xl shadow-sm flex flex-col overflow-hidden border"
+                     :class="parseInt(product.quantity) === 0 ? 'border-red-200 bg-red-50/10' : 'border-slate-200'">
                     <!-- Top bar - priority indicator -->
-                    <div class="flex items-center justify-between px-4 pt-4 pb-2" :class="parseInt(product.quantity) === 0 ? 'opacity-70' : ''">
+                    <div class="flex items-center justify-between px-4 pt-4 pb-2">
                         <span class="text-sm font-semibold text-slate-800 truncate" x-text="product.name"></span>
                         <div class="ml-2 shrink-0 flex items-center gap-1.5">
-                            <!-- Tugadi badge -->
+                            <!-- Tugagan badge -->
                             <template x-if="parseInt(product.quantity) === 0">
-                                <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded-full">
+                                <span class="inline-flex items-center gap-1 text-[10px] font-black bg-red-500 text-white px-2 py-0.5 rounded-full shadow-sm">
                                     <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-                                    Qolmadi
+                                    Tugagan
                                 </span>
                             </template>
                             <!-- Kam qoldi badge -->
@@ -154,10 +155,19 @@
                         </template>
                     </div>
 
+                    <!-- Updated at -->
+                    <div class="px-4 pb-2.5 flex items-center gap-1.5">
+                        <svg class="w-3 h-3 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span class="text-[10px] text-slate-400" x-text="formatDate(product.updated_at)"></span>
+                    </div>
+
                     <!-- Actions -->
-                    <div class="border-t border-slate-100 flex">
+                    <div class="border-t flex" :class="parseInt(product.quantity) === 0 ? 'border-red-100' : 'border-slate-100'">
                         <button @click="editProduct(product)"
-                            class="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors border-r border-slate-100">
+                            class="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors border-r"
+                            :class="parseInt(product.quantity) === 0
+                                ? 'text-red-600 bg-red-50/50 hover:bg-red-100 border-red-100 font-bold'
+                                : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 border-slate-100'">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
@@ -452,6 +462,13 @@ function productApp() {
             const p = this.products.find(p => p.id === id);
             if (!p) return '—';
             return (parseInt(p.quantity) * parseFloat(p.price)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m';
+        },
+
+        formatDate(dateStr) {
+            if (!dateStr) return '—';
+            const d = new Date(dateStr);
+            const p = n => String(n).padStart(2, '0');
+            return `${p(d.getDate())}.${p(d.getMonth()+1)}.${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
         },
 
         showNotif(msg, type) {

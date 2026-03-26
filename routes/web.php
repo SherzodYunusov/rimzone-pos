@@ -26,6 +26,7 @@ Route::get('/sales', [App\Http\Controllers\SaleController::class, 'index']);
 Route::post('/sales', [App\Http\Controllers\SaleController::class, 'store']);
 Route::get('/sales/{sale}', [App\Http\Controllers\SaleController::class, 'show']);
 Route::delete('/sales/{sale}', [App\Http\Controllers\SaleController::class, 'destroy']);
+Route::post('/sales/{sale}/pay', [App\Http\Controllers\SaleController::class, 'pay']);
 
 // Hisobotlar routelari
 Route::get('/reports', [App\Http\Controllers\ReportController::class, 'index']);

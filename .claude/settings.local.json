@@ -4,7 +4,9 @@
       "Bash(\"D:/OSPanel/modules/PHP-8.3/php.exe\" artisan:*)",
       "Bash(\"D:/OSPanel/modules/PHP-8.3/php.exe\" -l app/Http/Controllers/ProductController.php)",
       "Bash(\"D:/OSPanel/modules/PHP-8.3/php.exe\" -l app/Http/Controllers/ReportController.php)",
-      "Bash(\"D:/OSPanel/modules/PHP-8.3/php.exe\" -l app/Models/Product.php)"
+      "Bash(\"D:/OSPanel/modules/PHP-8.3/php.exe\" -l app/Models/Product.php)",
+      "Read(//d/OSPanel/modules/**)",
+      "Read(//d/OSPanel/system/**)"
     ]
   }
 }

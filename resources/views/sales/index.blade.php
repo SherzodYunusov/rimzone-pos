@@ -444,7 +444,7 @@
                 </div>
 
                 <!-- New Customer Form -->
-                <div x-show="showNewCustomerForm" x-collapse class="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
+                <div x-show="showNewCustomerForm" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" class="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
                     <div class="flex items-center justify-between mb-2">
                         <h3 class="text-sm font-bold text-blue-900">Yangi Mijoz</h3>
                         <button type="button" @click="showNewCustomerForm = false" class="text-xs font-bold text-blue-600 hover:text-blue-700">Bekor</button>
@@ -479,6 +479,18 @@
                     <label class="block text-xs font-bold text-slate-700 uppercase mb-2">Savdo Sanasi</label>
                     <input type="date" x-model="sellForm.sale_date"
                         class="w-full px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-700 bg-white shadow-sm">
+                </div>
+
+                <!-- Nasiya muddati (faqat nasiya uchun) -->
+                <div x-show="sellForm.payment_method === 'nasiya'"
+                     x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+                    <label class="block text-xs font-bold text-orange-600 uppercase mb-2">
+                        <svg class="w-3.5 h-3.5 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Nasiya muddati (ixtiyoriy)
+                    </label>
+                    <input type="date" x-model="sellForm.due_date"
+                        class="w-full px-3 py-2.5 text-sm border border-orange-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400/30 focus:border-orange-400 text-slate-700 bg-orange-50/30 [color-scheme:light]">
+                    <p class="text-[10px] text-slate-400 mt-1">Qarzni to'lash kerak bo'lgan sana</p>
                 </div>
             </div>
 
@@ -517,7 +529,7 @@ function posApp() {
         loading: false,
         pulseCart: false,
 
-        sellForm: { customer_id: '', sale_date: '', payment_method: '' },
+        sellForm: { customer_id: '', sale_date: '', payment_method: '', due_date: '' },
         sellErrors: {},
 
         showNewCustomerForm: false,
@@ -584,6 +596,7 @@ function posApp() {
         openSellModal() {
             this.sellForm.sale_date = new Date().toISOString().split('T')[0];
             this.sellForm.customer_id = '';
+            this.sellForm.due_date = '';
             this.sellErrors = {};
             this.showNewCustomerForm = false;
             this.isSellOpen = true;
@@ -610,6 +623,7 @@ function posApp() {
                 customer_id:    this.sellForm.customer_id || null,
                 sale_date:      this.sellForm.sale_date,
                 payment_method: this.sellForm.payment_method,
+                due_date:       (this.sellForm.payment_method === 'nasiya' && this.sellForm.due_date) ? this.sellForm.due_date : null,
                 items: this.cart.map(i => ({ product_id: i.id, quantity: i.qty }))
             };
 

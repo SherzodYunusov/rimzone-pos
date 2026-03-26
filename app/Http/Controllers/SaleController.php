@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Sale;
 use App\Models\SaleItem;
+use App\Models\SalePayment;
 use App\Models\Product;
 use App\Models\Customer;
 use Illuminate\Http\Request;
@@ -13,8 +14,8 @@ class SaleController extends Controller
 {
     public function index()
     {
-        $sales    = Sale::with(['customer', 'items.product'])->latest()->get();
-        $products = Product::orderBy('name')->get();
+        $sales     = Sale::with(['customer', 'items.product'])->latest()->get();
+        $products  = Product::orderBy('name')->get();
         $customers = Customer::orderBy('name')->get();
 
         return view('sales.index', compact('sales', 'products', 'customers'));
@@ -22,7 +23,7 @@ class SaleController extends Controller
 
     /**
      * Savatcha asosida yangi savdo yaratish.
-     * Body: { customer_id, sale_date, items: [{product_id, quantity}, ...] }
+     * Body: { customer_id, sale_date, payment_method, due_date?, items: [{product_id, quantity}] }
      */
     public function store(Request $request)
     {
@@ -30,6 +31,7 @@ class SaleController extends Controller
             'customer_id'        => 'nullable|exists:customers,id',
             'sale_date'          => 'required|date',
             'payment_method'     => 'required|in:naqd,karta,nasiya',
+            'due_date'           => 'nullable|date',
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
             'items.*.quantity'   => 'required|integer|min:1',
@@ -44,14 +46,12 @@ class SaleController extends Controller
         }
 
         try {
-            // &$sale o'rniga DB::transaction dan qaytaramiz (to'g'ri usul)
             $sale = DB::transaction(function () use ($data) {
 
                 $totalPrice = 0;
                 $lines      = [];
 
                 foreach ($data['items'] as $item) {
-                    // Pessimistic locking — bir vaqtda 2 foydalanuvchi xuddi shu mahsulotni sotmasin
                     $product = Product::lockForUpdate()->findOrFail($item['product_id']);
 
                     if ($product->quantity < $item['quantity']) {
@@ -69,11 +69,16 @@ class SaleController extends Controller
                     $totalPrice += $product->price * $item['quantity'];
                 }
 
+                $isNasiya = $data['payment_method'] === 'nasiya';
+
                 $sale = Sale::create([
                     'customer_id'    => $data['customer_id'] ?? null,
                     'total_price'    => $totalPrice,
                     'sale_date'      => $data['sale_date'],
                     'payment_method' => $data['payment_method'],
+                    'status'         => $isNasiya ? 'debt' : 'paid',
+                    'paid_amount'    => $isNasiya ? 0 : $totalPrice,
+                    'due_date'       => $isNasiya ? ($data['due_date'] ?? null) : null,
                 ]);
 
                 foreach ($lines as $line) {
@@ -111,16 +116,71 @@ class SaleController extends Controller
         return response()->json(['success' => true, 'sale' => $sale]);
     }
 
+    /**
+     * Nasiya qarzini qisman yoki to'liq to'lash.
+     * Body: { amount, payment_date, notes? }
+     */
+    public function pay(Request $request, Sale $sale)
+    {
+        $data = $request->validate([
+            'amount'       => 'required|numeric|min:0.01',
+            'payment_date' => 'required|date',
+            'notes'        => 'nullable|string|max:255',
+        ]);
+
+        if ($sale->status === 'paid') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Bu savdo allaqachon to\'liq to\'langan.',
+            ], 422);
+        }
+
+        $remaining = $sale->remaining_debt;
+        if ($remaining <= 0) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Qarz yo\'q — to\'lash shart emas.',
+            ], 422);
+        }
+
+        DB::transaction(function () use ($sale, $data) {
+            // To'lov miqdorini qolgan qarzdan oshirmaymiz
+            $payAmount = min((float) $data['amount'], $sale->remaining_debt);
+
+            SalePayment::create([
+                'sale_id'      => $sale->id,
+                'amount'       => $payAmount,
+                'payment_date' => $data['payment_date'],
+                'notes'        => $data['notes'] ?? null,
+            ]);
+
+            $newPaid = (float) $sale->paid_amount + $payAmount;
+            $total   = (float) $sale->total_price;
+
+            $sale->paid_amount = $newPaid;
+            $sale->status      = $newPaid >= $total ? 'paid' : ($newPaid > 0 ? 'partial' : 'debt');
+            $sale->save();
+        });
+
+        $sale->refresh();
+
+        return response()->json([
+            'success'        => true,
+            'message'        => 'To\'lov muvaffaqiyatli qabul qilindi!',
+            'remaining_debt' => $sale->remaining_debt,
+            'status'         => $sale->status,
+        ]);
+    }
+
     public function destroy(Sale $sale)
     {
         try {
             DB::transaction(function () use ($sale) {
-                // Eager load before delete so we have item data available
                 $sale->load('items');
                 foreach ($sale->items as $item) {
                     Product::whereKey($item->product_id)->increment('quantity', $item->quantity);
                 }
-                $sale->delete(); // onDelete('cascade') ile SaleItems ham o'chadi
+                $sale->delete();
             });
 
             return response()->json([
