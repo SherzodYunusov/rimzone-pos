@@ -158,9 +158,16 @@
                                         :disabled="!cartQty(product.id)">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
                                     </button>
-                                    <div class="flex-1 text-center text-sm font-bold text-slate-800 py-1 min-w-[2.5rem] qty-badge"
-                                         :key="cartQty(product.id)"
-                                         x-text="cartQty(product.id) || '-'"></div>
+                                    <input
+                                        type="number"
+                                        inputmode="numeric"
+                                        min="0"
+                                        :max="product.quantity"
+                                        :value="cartQty(product.id) || ''"
+                                        @input="debouncedSetQty(product, $event.target.value)"
+                                        @focus="$event.target.select()"
+                                        placeholder="—"
+                                        class="flex-1 w-full min-w-[2.5rem] text-center text-sm font-bold text-slate-800 bg-transparent border-none outline-none py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                                     <button @click="increment(product)"
                                         class="qty-btn w-9 h-9 flex items-center justify-center text-slate-500 hover:bg-blue-100 hover:text-blue-600 font-bold color-transition"
                                         :disabled="cartQty(product.id) >= product.quantity">
@@ -238,16 +245,36 @@
                 <!-- Cart items -->
                 <div class="space-y-2">
                     <template x-for="(item, idx) in cart" :key="item.id">
-                        <div class="cart-item bg-white hover:bg-blue-50/50 border border-slate-200 rounded-xl p-3 transition-all shadow-sm"
+                        <div class="cart-item bg-white hover:bg-blue-50/50 border rounded-xl p-3 transition-all shadow-sm"
+                             :class="flashCartId === item.id ? 'border-emerald-400 bg-emerald-50/60' : 'border-slate-200'"
                              :style="`animation-delay: ${idx * 0.05}s`">
-                            <div class="flex items-center gap-3 justify-between">
+                            <div class="flex items-start gap-2 justify-between">
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-semibold text-slate-800 leading-tight truncate" x-text="item.name"></p>
-                                    <p class="text-xs text-slate-500 mt-1" x-text="formatMoney(item.price) + ' × ' + item.qty"></p>
+                                    <p class="text-xs text-slate-500 mt-0.5" x-text="formatMoney(item.price) + ' so\'m / dona'"></p>
                                 </div>
-                                <div class="shrink-0 text-right">
+                                <div class="shrink-0 flex flex-col items-end gap-1.5">
                                     <p class="text-sm font-bold text-blue-700" x-text="formatMoney(item.price * item.qty) + ' so\'m'"></p>
-                                    <button @click="removeFromCart(item.id)" class="text-[10px] text-slate-400 hover:text-red-600 transition-colors font-bold mt-1">Olib tashlash</button>
+                                    <!-- Mini stepper -->
+                                    <div class="flex items-center bg-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+                                        <button @click="decrement(item.id)"
+                                            class="w-7 h-7 flex items-center justify-center text-slate-400 hover:bg-red-100 hover:text-red-600 transition-colors text-xs font-bold">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                                        </button>
+                                        <input
+                                            type="number"
+                                            inputmode="numeric"
+                                            min="1"
+                                            :value="item.qty"
+                                            @input="debouncedSetQtyById(item.id, $event.target.value)"
+                                            @focus="$event.target.select()"
+                                            class="w-9 text-center text-xs font-bold text-slate-800 bg-transparent border-none outline-none py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                        <button @click="incrementById(item.id)"
+                                            class="w-7 h-7 flex items-center justify-center text-slate-400 hover:bg-blue-100 hover:text-blue-600 transition-colors text-xs font-bold">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                        </button>
+                                    </div>
+                                    <button @click="removeFromCart(item.id)" class="text-[10px] text-slate-400 hover:text-red-600 transition-colors font-medium">O'chirish</button>
                                 </div>
                             </div>
                         </div>
@@ -264,7 +291,8 @@
                     </div>
                     <div class="h-0.5 bg-gradient-to-r from-blue-300 to-indigo-300 rounded-full"></div>
                 </div>
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between rounded-xl transition-all duration-300 px-2 -mx-2 py-1 -my-1"
+                     :class="totalFlash ? 'bg-emerald-50 ring-1 ring-emerald-300' : ''">
                     <span class="text-sm font-bold text-slate-700">UMUMIY SUMMA:</span>
                     <span class="text-2xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent" x-text="formatMoney(cartTotal) + ' so\'m'"></span>
                 </div>
@@ -621,6 +649,10 @@ function posApp() {
         pulseCart: false,
         showCartMobile: false,
 
+        _qtyTimers: {},   // debounce timer handles per product id
+        totalFlash: false,
+        flashCartId: null,
+
         sellForm: { customer_id: '', sale_date: '', payment_method: '', due_date: '' },
         sellErrors: {},
 
@@ -653,29 +685,92 @@ function posApp() {
                 return;
             }
             const existing = this.cart.find(i => i.id === product.id);
-            if (existing) { 
-                existing.qty++; 
-            } else { 
-                this.cart.push({ 
-                    id: product.id, 
-                    name: product.name, 
-                    price: parseFloat(product.price), 
-                    qty: 1 
-                }); 
+            if (existing) {
+                existing.qty++;
+            } else {
+                this.cart.push({
+                    id: product.id,
+                    name: product.name,
+                    price: parseFloat(product.price),
+                    qty: 1
+                });
             }
             this.triggerPulse();
+            this.triggerFlash(product.id);
+            this.triggerTotalFlash();
         },
-        
+
         decrement(pid) {
             const idx = this.cart.findIndex(i => i.id === pid);
             if (idx === -1) return;
-            if (this.cart[idx].qty <= 1) { 
-                this.cart.splice(idx, 1); 
-            } else { 
-                this.cart[idx].qty--; 
+            if (this.cart[idx].qty <= 1) {
+                this.cart.splice(idx, 1);
+            } else {
+                this.cart[idx].qty--;
+                this.triggerFlash(pid);
             }
+            this.triggerTotalFlash();
         },
-        
+
+        // To'g'ridan-to'g'ri miqdor kiritish (mahsulot grid)
+        setQty(product, value) {
+            const v = parseInt(value);
+            if (isNaN(v) || v <= 0) { this.removeFromCart(product.id); return; }
+            const capped = Math.min(v, product.quantity);
+            if (capped <= 0) { this.showNotif(`${product.name}: omborda mahsulot qolmagan!`, 'error'); return; }
+            if (capped < v) this.showNotif(`${product.name}: omborda faqat ${product.quantity} dona mavjud!`, 'error');
+            const existing = this.cart.find(i => i.id === product.id);
+            if (existing) { existing.qty = capped; }
+            else { this.cart.push({ id: product.id, name: product.name, price: parseFloat(product.price), qty: capped }); }
+        },
+
+        // Savatchadagi item uchun miqdor kiritish (ID bo'yicha)
+        setQtyById(pid, value) {
+            const v = parseInt(value);
+            const idx = this.cart.findIndex(i => i.id === pid);
+            if (idx === -1) return;
+            if (isNaN(v) || v <= 0) { this.cart.splice(idx, 1); return; }
+            this.cart[idx].qty = v;
+        },
+
+        // Savatchadagi item uchun +1 (ID bo'yicha)
+        incrementById(pid) {
+            const idx = this.cart.findIndex(i => i.id === pid);
+            if (idx !== -1) { this.cart[idx].qty++; this.triggerFlash(pid); }
+        },
+
+        // Debounced version for @input on product grid qty field
+        debouncedSetQty(product, value) {
+            clearTimeout(this._qtyTimers[product.id]);
+            this._qtyTimers[product.id] = setTimeout(() => {
+                this.setQty(product, value);
+                if (this.cartQty(product.id) > 0) this.triggerFlash(product.id);
+                this.triggerTotalFlash();
+            }, 300);
+        },
+
+        // Debounced version for @input on cart item qty field
+        debouncedSetQtyById(pid, value) {
+            clearTimeout(this._qtyTimers['c_' + pid]);
+            this._qtyTimers['c_' + pid] = setTimeout(() => {
+                this.setQtyById(pid, value);
+                if (this.cartQty(pid) > 0) this.triggerFlash(pid);
+                this.triggerTotalFlash();
+            }, 300);
+        },
+
+        // Brief green flash on total sum row
+        triggerTotalFlash() {
+            this.totalFlash = true;
+            setTimeout(() => { this.totalFlash = false; }, 650);
+        },
+
+        // Brief green flash on a specific cart item row
+        triggerFlash(pid) {
+            this.flashCartId = pid;
+            setTimeout(() => { this.flashCartId = null; }, 650);
+        },
+
         removeFromCart(pid) {
             this.cart = this.cart.filter(i => i.id !== pid);
         },

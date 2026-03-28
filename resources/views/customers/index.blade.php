@@ -108,6 +108,18 @@
                                 </div>
                                 <span class="text-xs font-semibold text-slate-600 truncate" x-text="customer.address"></span>
                             </div>
+
+                            <!-- Xaritada ko'rish — faqat koordinata bo'lganda -->
+                            <template x-if="customer.lat && customer.lng">
+                                <a :href="`https://www.google.com/maps?q=${customer.lat},${customer.lng}`"
+                                   target="_blank"
+                                   class="flex items-center justify-center gap-2 w-full py-2 px-3 bg-blue-50 hover:bg-blue-100 border border-blue-200 hover:border-blue-300 text-blue-700 text-xs font-semibold rounded-xl transition-colors">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                                    </svg>
+                                    Xaritada ko'rish
+                                </a>
+                            </template>
                         </div>
                     </div>
 
@@ -206,18 +218,34 @@
                             </svg>
                         </div>
                     </div>
-                    <!-- Parsed coords display -->
+                    <!-- Muvaffaqiyatli: koordinatalar -->
                     <div x-show="form.lat && form.lng" class="mt-2 flex items-center gap-2 text-xs text-emerald-600 font-medium">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
                         </svg>
-                        <span x-text="`Koordinatlar: ${Number(form.lat).toFixed(6)}, ${Number(form.lng).toFixed(6)}`"></span>
-                        <button type="button" @click="form.lat=''; form.lng=''; form.map_link=''"
+                        <span x-text="`${Number(form.lat).toFixed(6)}, ${Number(form.lng).toFixed(6)}`"></span>
+                        <button type="button" @click="form.lat=''; form.lng=''; form.map_link=''; mapLinkHint=''"
                                 class="ml-auto text-slate-400 hover:text-red-500 transition-colors">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                             </svg>
                         </button>
+                    </div>
+
+                    <!-- Xato: qisqartirilgan havola (maps.app.goo.gl) -->
+                    <div x-show="mapLinkHint === 'shortened'" class="mt-2 flex items-start gap-2 text-xs bg-amber-50 border border-amber-200 text-amber-800 rounded-lg px-3 py-2">
+                        <svg class="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                        </svg>
+                        <span>
+                            <strong>maps.app.goo.gl</strong> qisqartirilgan havola — o'qib bo'lmaydi.<br>
+                            Brauzerda Google Maps ni oching → manzil satridan <strong>to'liq URL</strong> ni ko'chiring.
+                        </span>
+                    </div>
+
+                    <!-- Koordinata topilmadi -->
+                    <div x-show="mapLinkHint === 'notfound'" class="mt-2 text-xs text-slate-400">
+                        Koordinata topilmadi — Google Maps dan to'liq havola ko'chiring
                     </div>
                 </div>
 
@@ -289,20 +317,43 @@
 </style>
 <script>
 // ── Google Maps URL → lat/lng extractor ──────────────────────────────────
+// Prioritet: !3d!4d (aniq pin) > /@ (xarita markazi) > q= > query= > ll=
 function extractLatLng(url) {
     if (!url) return null;
-    // Format: /@lat,lng,zoom  (most common share URL)
-    let m = url.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+    // Qisqartirilgan havola — parse qilib bo'lmaydi
+    if (/maps\.app\.goo\.gl|goo\.gl\/maps/i.test(url)) {
+        return { error: 'shortened' };
+    }
+
+    // URL encoding ni ochish
+    let u;
+    try { u = decodeURIComponent(url); } catch(e) { u = url; }
+
+    // 1. !3dlat!4dlng — ENG ANIQ (joylashuvning exact pin koordinatasi)
+    let m = u.match(/!3d(-?\d+\.?\d*)!4d(-?\d+\.?\d*)/);
     if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
-    // Format: ?q=lat,lng  (simple search/pin URL)
-    m = url.match(/[?&]q=(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+    // 2. /@lat,lng — xarita ko'rinish markazi (viewport center)
+    m = u.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
     if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
-    // Format: !3dlat!4dlng  (place URLs)
-    m = url.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+
+    // 3. ?q=lat,lng yoki &q=lat,lng
+    m = u.match(/[?&]q=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
     if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
-    // Format: ll=lat,lng
-    m = url.match(/[?&]ll=(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+    // 4. query=lat,lng (Google Maps API format)
+    m = u.match(/[?&]query=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
     if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+
+    // 5. ?ll=lat,lng (eski Google Maps format)
+    m = u.match(/[?&]ll=(-?\d+\.?\d*),(-?\d+\.?\d*)/);
+    if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+
+    // 6. /lat,lng yo'l ichida (ba'zi mobil havolalar)
+    m = u.match(/\/(-?\d{1,3}\.\d{4,}),(-?\d{1,3}\.\d{4,})/);
+    if (m) return { lat: parseFloat(m[1]), lng: parseFloat(m[2]) };
+
     return null;
 }
 
@@ -352,6 +403,7 @@ function customerApp() {
         photoFile: null,
         form: { name: '', phone: '', address: '', company_name: '', map_link: '', lat: '', lng: '' },
         errors: {},
+        mapLinkHint: '',   // '' | 'shortened' | 'notfound'
 
         init() {
             // Render maps for all customers that have coordinates
@@ -367,13 +419,18 @@ function customerApp() {
         },
 
         parseMapLink(url) {
+            if (!url) { this.form.lat = ''; this.form.lng = ''; this.mapLinkHint = ''; return; }
             const coords = extractLatLng(url);
-            if (coords) {
+            if (coords && coords.error === 'shortened') {
+                this.form.lat = ''; this.form.lng = '';
+                this.mapLinkHint = 'shortened';
+            } else if (coords) {
                 this.form.lat = coords.lat;
                 this.form.lng = coords.lng;
+                this.mapLinkHint = '';
             } else {
-                this.form.lat = '';
-                this.form.lng = '';
+                this.form.lat = ''; this.form.lng = '';
+                this.mapLinkHint = 'notfound';
             }
         },
 
@@ -391,6 +448,7 @@ function customerApp() {
             this.editingId = null;
             this.form = { name: '', phone: '', address: '', company_name: '', map_link: '', lat: '', lng: '' };
             this.errors = {};
+            this.mapLinkHint = '';
             this.resetPhoto();
             this.isFormOpen = true;
         },
@@ -402,10 +460,11 @@ function customerApp() {
                 address: customer.address,
                 company_name: customer.company_name,
                 map_link: customer.map_link || '',
-                lat: customer.lat || '',
-                lng: customer.lng || '',
+                lat: customer.lat ?? '',
+                lng: customer.lng ?? '',
             };
             this.errors = {};
+            this.mapLinkHint = '';
             this.photoPreview = customer.photo_url || null;
             this.photoName = null;
             this.photoFile = null;
@@ -424,9 +483,9 @@ function customerApp() {
             fd.append('phone', this.form.phone);
             fd.append('address', this.form.address);
             fd.append('company_name', this.form.company_name);
-            if (this.form.map_link) fd.append('map_link', this.form.map_link);
-            if (this.form.lat !== '' && this.form.lat !== null) fd.append('lat', this.form.lat);
-            if (this.form.lng !== '' && this.form.lng !== null) fd.append('lng', this.form.lng);
+            fd.append('map_link', this.form.map_link ?? '');
+            fd.append('lat',      (this.form.lat !== null && this.form.lat !== undefined) ? this.form.lat : '');
+            fd.append('lng',      (this.form.lng !== null && this.form.lng !== undefined) ? this.form.lng : '');
             fd.append('_token', document.querySelector('meta[name="csrf-token"]').content);
             if (this.photoFile) fd.append('photo', this.photoFile);
             const url = this.editingId ? `/customers/${this.editingId}` : '/customers';

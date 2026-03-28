@@ -19,6 +19,12 @@ class CustomerController extends Controller
 
     public function store(Request $request)
     {
+        foreach (['lat', 'lng', 'map_link'] as $field) {
+            if ($request->input($field) === '') {
+                $request->merge([$field => null]);
+            }
+        }
+
         $validated = $request->validate([
             'name'         => 'required|string|max:255',
             'phone'        => 'required|string|max:50',
@@ -46,6 +52,13 @@ class CustomerController extends Controller
 
     public function update(Request $request, Customer $customer)
     {
+        // Empty string → null so nullable validation passes and DB field gets cleared
+        foreach (['lat', 'lng', 'map_link'] as $field) {
+            if ($request->input($field) === '') {
+                $request->merge([$field => null]);
+            }
+        }
+
         $validated = $request->validate([
             'name'         => 'required|string|max:255',
             'phone'        => 'required|string|max:50',
@@ -56,6 +69,11 @@ class CustomerController extends Controller
             'lng'          => 'nullable|numeric|between:-180,180',
             'map_link'     => 'nullable|string|max:2048',
         ]);
+
+        // Always include these keys so update() clears old values when user removes location
+        $validated['lat']      = $validated['lat']      ?? null;
+        $validated['lng']      = $validated['lng']      ?? null;
+        $validated['map_link'] = $validated['map_link'] ?? null;
 
         if ($request->hasFile('photo')) {
             // Eski rasmni o'chirish
