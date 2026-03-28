@@ -108,11 +108,18 @@
                   x-text="cartCount + ' dona'"></span>
         </div>
 
-        <button type="button" @click="isHistoryOpen = true"
-            class="p-2 md:px-4 md:py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-all flex items-center gap-2 border border-slate-200 shadow-sm">
-            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <span class="hidden md:inline">Hisobot</span>
-        </button>
+        <div class="flex items-center gap-2">
+            <button type="button" @click="isHistoryOpen = true"
+                class="p-2 md:px-4 md:py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-all flex items-center gap-2 border border-slate-200 shadow-sm">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <span class="hidden md:inline">Hisobot</span>
+            </button>
+            {{-- Mobile nav link (since bottom nav is hidden on sales) --}}
+            <a href="{{ url('/products') }}"
+               class="md:hidden p-2 bg-white hover:bg-slate-50 text-slate-500 rounded-xl border border-slate-200 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </a>
+        </div>
     </div>
 
     <!-- ── POS VIEW ─────────────────────────────────────────────── -->
@@ -133,30 +140,29 @@
             </div>
 
             <!-- Product Grid -->
-            <div class="flex-1 overflow-y-auto p-4 pb-24 md:pb-4">
-                <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+            <div class="flex-1 overflow-y-auto p-3 md:p-4 pb-24 md:pb-4">
+                <div class="grid grid-cols-2 xl:grid-cols-3 gap-2 md:gap-3">
                     <template x-for="(product, idx) in filteredProducts" :key="product.id">
-                        <div class="product-card animate-fade-up rounded-xl p-4 flex flex-col gap-3 cursor-pointer"
+                        <div class="product-card animate-fade-up rounded-xl p-3 md:p-4 flex flex-col gap-2 md:gap-3 cursor-pointer"
                              :style="`animation-delay: ${idx * 0.03}s`">
-                            <!-- Name & price -->
-                            <div class="flex items-start justify-between gap-2">
+                            <!-- Name & stock badge -->
+                            <div class="flex items-start justify-between gap-1.5">
                                 <div class="flex-1 min-w-0">
-                                    <p class="text-sm font-bold text-slate-800 leading-tight truncate" x-text="product.name"></p>
-                                    <p class="text-xs text-blue-600 font-semibold mt-0.5" x-text="formatMoney(product.price) + ' so\'m'"></p>
+                                    <p class="text-xs md:text-sm font-bold text-slate-800 leading-tight line-clamp-2" x-text="product.name"></p>
+                                    <p class="text-[11px] md:text-xs text-blue-600 font-semibold mt-0.5" x-text="formatMoney(product.price) + ' so\'m'"></p>
                                 </div>
-                                <!-- Stock badge -->
-                                <span class="shrink-0 text-[11px] font-bold px-2 py-1 rounded-lg border transition-all stock-badge"
+                                <span class="shrink-0 text-[10px] md:text-[11px] font-bold px-1.5 py-0.5 rounded-md border transition-all stock-badge"
                                       :class="product.quantity <= 5 ? 'low bg-red-50 text-red-700 border-red-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
                                       x-text="product.quantity + ' ta'"></span>
                             </div>
 
-                            <!-- Counter buttons -->
-                            <div class="flex items-center gap-2">
+                            <!-- Counter -->
+                            <div class="flex items-center gap-1.5">
                                 <div class="flex items-center bg-slate-100 border border-slate-200 rounded-lg overflow-hidden flex-1 shadow-sm">
                                     <button @click="decrement(product.id)"
-                                        class="qty-btn w-9 h-9 flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-600 font-bold color-transition"
+                                        class="qty-btn w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-600 font-bold color-transition shrink-0"
                                         :disabled="!cartQty(product.id)">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
                                     </button>
                                     <input
                                         type="number"
@@ -167,18 +173,17 @@
                                         @input="debouncedSetQty(product, $event.target.value)"
                                         @focus="$event.target.select()"
                                         placeholder="—"
-                                        class="flex-1 w-full min-w-[2.5rem] text-center text-sm font-bold text-slate-800 bg-transparent border-none outline-none py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                        class="flex-1 w-0 min-w-0 text-center text-xs md:text-sm font-bold text-slate-800 bg-transparent border-none outline-none py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                                     <button @click="increment(product)"
-                                        class="qty-btn w-9 h-9 flex items-center justify-center text-slate-500 hover:bg-blue-100 hover:text-blue-600 font-bold color-transition"
+                                        class="qty-btn w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-slate-500 hover:bg-blue-100 hover:text-blue-600 font-bold color-transition shrink-0"
                                         :disabled="cartQty(product.id) >= product.quantity">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                                     </button>
                                 </div>
-                                <!-- Quick add button -->
                                 <button x-show="!cartQty(product.id)"
                                     @click="increment(product)"
-                                    class="shrink-0 h-9 px-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-xs font-bold rounded-lg transition-all shadow-sm hover:shadow-blue-300">
-                                    Qo'sh
+                                    class="shrink-0 h-8 md:h-9 px-2 md:px-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-[11px] md:text-xs font-bold rounded-lg transition-all shadow-sm hover:shadow-blue-300">
+                                    +
                                 </button>
                             </div>
                         </div>

@@ -45,6 +45,10 @@
         .nav-link.active-green { background: #f0fdf4; color: #16a34a; font-weight:700; border-left-color: #16a34a; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.08); }
         .nav-link.active-amber { background: #fffbeb; color: #d97706; font-weight:700; border-left-color: #d97706; box-shadow: 0 4px 12px rgba(217, 119, 6, 0.08); }
 
+        /* Hide scrollbar but keep scroll */
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
         /* Glassmorphism utility */
         .glass {
             background: rgba(255, 255, 255, 0.8);
@@ -163,15 +167,15 @@
     <!-- ===== MAIN CONTENT ===== -->
     <div class="flex-1 flex flex-col min-h-screen overflow-auto page-enter min-w-0">
 
-        <!-- Mobile top bar (hamburger + logo) -->
-        <div class="md:hidden sticky top-0 z-30 h-14 bg-white border-b border-slate-200 glass flex items-center px-4 gap-3 shrink-0">
+        <!-- Mobile top bar -->
+        <div class="md:hidden sticky top-0 z-30 h-14 bg-white/95 backdrop-blur-sm border-b border-slate-200 flex items-center px-4 gap-3 shrink-0 shadow-sm">
             <button @click="sidebarOpen = true"
-                    class="p-2 rounded-lg text-slate-500 hover:bg-slate-100 transition-colors">
+                    class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 active:bg-slate-200 transition-colors shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
             </button>
-            <a href="{{ url('/products') }}" class="flex items-center gap-2">
+            <a href="{{ url('/products') }}" class="flex items-center gap-2 shrink-0">
                 <div class="w-7 h-7 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center shadow-sm">
                     <svg class="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z"/>
@@ -180,13 +184,79 @@
                 </div>
                 <span class="text-sm font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">RIMzone</span>
             </a>
-            <!-- Current page label from yielded title -->
-            <span class="ml-auto text-xs font-semibold text-slate-400 truncate">@yield('title', '')</span>
+            <span class="ml-auto text-xs font-semibold text-slate-500 truncate">@yield('title', '')</span>
         </div>
 
         @yield('content')
     </div>
 
     @yield('scripts')
+
+    @if(!request()->is('sales'))
+    {{-- ── MOBILE BOTTOM NAVIGATION ────────────────────────────────────── --}}
+    <nav class="md:hidden fixed bottom-0 inset-x-0 z-[200] bg-white/95 backdrop-blur-md border-t border-slate-200 shadow-[0_-4px_24px_rgba(0,0,0,0.07)]"
+         style="padding-bottom:env(safe-area-inset-bottom,0px)">
+        <div class="grid grid-cols-4 h-[60px]">
+
+            {{-- Ombor --}}
+            <a href="{{ url('/products') }}"
+               class="relative flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95
+                      {{ request()->is('products') ? 'text-blue-600' : 'text-slate-400' }}">
+                @if(request()->is('products'))
+                <span class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-blue-500 rounded-b-full"></span>
+                @endif
+                <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                     stroke-width="{{ request()->is('products') ? '2.3' : '1.8' }}">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/>
+                </svg>
+                <span class="text-[10px] leading-none {{ request()->is('products') ? 'font-bold' : 'font-medium' }}">Ombor</span>
+            </a>
+
+            {{-- Mijozlar --}}
+            <a href="{{ url('/customers') }}"
+               class="relative flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95
+                      {{ request()->is('customers') ? 'text-violet-600' : 'text-slate-400' }}">
+                @if(request()->is('customers'))
+                <span class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-violet-500 rounded-b-full"></span>
+                @endif
+                <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                     stroke-width="{{ request()->is('customers') ? '2.3' : '1.8' }}">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+                <span class="text-[10px] leading-none {{ request()->is('customers') ? 'font-bold' : 'font-medium' }}">Mijozlar</span>
+            </a>
+
+            {{-- Savdo --}}
+            <a href="{{ url('/sales') }}"
+               class="relative flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95
+                      {{ request()->is('sales') ? 'text-emerald-600' : 'text-slate-400' }}">
+                @if(request()->is('sales'))
+                <span class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-emerald-500 rounded-b-full"></span>
+                @endif
+                <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                     stroke-width="{{ request()->is('sales') ? '2.3' : '1.8' }}">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <span class="text-[10px] leading-none {{ request()->is('sales') ? 'font-bold' : 'font-medium' }}">Savdo</span>
+            </a>
+
+            {{-- Hisobotlar --}}
+            <a href="{{ url('/reports') }}"
+               class="relative flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95
+                      {{ request()->is('reports') ? 'text-amber-600' : 'text-slate-400' }}">
+                @if(request()->is('reports'))
+                <span class="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-amber-500 rounded-b-full"></span>
+                @endif
+                <svg class="w-[22px] h-[22px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                     stroke-width="{{ request()->is('reports') ? '2.3' : '1.8' }}">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+                <span class="text-[10px] leading-none {{ request()->is('reports') ? 'font-bold' : 'font-medium' }}">Hisobot</span>
+            </a>
+
+        </div>
+    </nav>
+    @endif
+
 </body>
 </html>

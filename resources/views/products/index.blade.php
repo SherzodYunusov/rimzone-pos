@@ -35,37 +35,60 @@
 <div x-data="productApp()">
 
     <!-- Page Header -->
-    <div class="h-14 md:h-16 bg-gradient-to-r from-white via-white to-blue-50/50 border-b border-slate-200 flex items-center justify-between px-4 md:px-8">
-        <div>
-            <h1 class="text-lg font-semibold text-slate-800">Ombor</h1>
-            <p class="text-xs text-slate-400" x-text="`${filteredProducts.length} ta mahsulot`"></p>
+    <div class="bg-gradient-to-r from-white via-white to-blue-50/50 border-b border-slate-200">
+        <div class="h-14 md:h-16 flex items-center justify-between px-4 md:px-8">
+            <div>
+                <h1 class="text-base md:text-lg font-semibold text-slate-800">Ombor</h1>
+                <p class="text-xs text-slate-400" x-text="`${filteredProducts.length} ta mahsulot`"></p>
+            </div>
+            <div class="flex items-center gap-2">
+                <div class="relative">
+                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                    <input type="text" x-model="searchTerm" placeholder="Qidirish..."
+                        class="pl-8 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400 w-28 sm:w-44 xl:w-56 transition-all">
+                </div>
+                <button @click="openNewModal()"
+                    class="inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-medium text-sm py-2 px-3 md:px-4 rounded-lg transition-colors shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <span class="hidden sm:inline">Mahsulot qo'shish</span>
+                </button>
+            </div>
         </div>
-        <div class="flex items-center gap-3">
-            <div class="hidden md:flex items-center bg-slate-100 rounded-lg p-1 gap-1">
-                <button @click="filterType = 'all'" :class="filterType === 'all' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-3 py-1.5 text-xs font-medium rounded-md transition-all">Barchasi</button>
-                <button @click="filterType = 'low'" :class="filterType === 'low' ? 'bg-white text-amber-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-3 py-1.5 text-xs font-medium rounded-md transition-all">Kam qoldi (&lt;5)</button>
-                <button @click="filterType = 'out'" :class="filterType === 'out' ? 'bg-white text-red-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'" class="px-3 py-1.5 text-xs font-medium rounded-md transition-all">Tugagan (0)</button>
-            </div>
-
-            <div class="relative">
-                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <input type="text" x-model="searchTerm" placeholder="Qidirish..."
-                    class="pl-9 pr-4 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400 w-32 sm:w-48 xl:w-56">
-            </div>
-            <button @click="openNewModal()"
-                class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-3 md:px-4 rounded-lg transition-colors shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span class="hidden sm:inline">Mahsulot qo'shish</span>
+        <!-- Filter chips — mobile horizontal scroll + desktop inline -->
+        <div class="px-4 md:px-8 pb-2.5 flex items-center gap-2 overflow-x-auto scrollbar-hide">
+            <button @click="filterType = 'all'"
+                :class="filterType === 'all'
+                    ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+                    : 'bg-white text-slate-500 border-slate-200 hover:border-blue-300 hover:text-blue-600'"
+                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-full transition-all">
+                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                Barchasi
+            </button>
+            <button @click="filterType = 'low'"
+                :class="filterType === 'low'
+                    ? 'bg-amber-500 text-white border-amber-500 shadow-sm'
+                    : 'bg-white text-slate-500 border-slate-200 hover:border-amber-300 hover:text-amber-600'"
+                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-full transition-all">
+                <span class="w-2 h-2 rounded-full bg-current inline-block"></span>
+                Kam qoldi (&lt;5)
+            </button>
+            <button @click="filterType = 'out'"
+                :class="filterType === 'out'
+                    ? 'bg-red-600 text-white border-red-600 shadow-sm'
+                    : 'bg-white text-slate-500 border-slate-200 hover:border-red-300 hover:text-red-600'"
+                class="shrink-0 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border rounded-full transition-all">
+                <span class="w-2 h-2 rounded-full bg-current inline-block"></span>
+                Tugagan (0)
             </button>
         </div>
     </div>
 
     <!-- Main Content -->
-    <main class="p-4 md:p-8">
+    <main class="p-3 md:p-8 pb-24 md:pb-8">
 
         <!-- Search result detail card -->
         <template x-if="selectedProductId">
@@ -97,24 +120,20 @@
         </template>
 
         <!-- Products Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-2 md:gap-4">
             <template x-for="product in filteredProducts" :key="product.id">
                 <div class="product-card card-enter bg-white rounded-xl shadow-sm flex flex-col overflow-hidden border"
-                     :class="parseInt(product.quantity) === 0 ? 'border-red-200 bg-red-50/10' : 'border-slate-200'">
-                    <!-- Top bar - priority indicator -->
-                    <div class="flex items-center justify-between px-4 pt-4 pb-2">
-                        <span class="text-sm font-semibold text-slate-800 truncate" x-text="product.name"></span>
-                        <div class="ml-2 shrink-0 flex items-center gap-1.5">
-                            <!-- Tugagan badge -->
+                     :class="parseInt(product.quantity) === 0 ? 'border-red-200 bg-red-50/20' : 'border-slate-200'">
+
+                    <!-- Header: name + badge -->
+                    <div class="flex items-start justify-between px-3 md:px-4 pt-3 md:pt-4 pb-1.5 gap-1.5">
+                        <span class="text-xs md:text-sm font-semibold text-slate-800 line-clamp-2 leading-tight flex-1" x-text="product.name"></span>
+                        <div class="shrink-0 flex flex-col items-end gap-1 mt-0.5">
                             <template x-if="parseInt(product.quantity) === 0">
-                                <span class="inline-flex items-center gap-1 text-[10px] font-black bg-red-500 text-white px-2 py-0.5 rounded-full shadow-sm">
-                                    <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
-                                    Tugagan
-                                </span>
+                                <span class="text-[9px] md:text-[10px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded-full shadow-sm whitespace-nowrap">Tugagan</span>
                             </template>
-                            <!-- Kam qoldi badge -->
                             <template x-if="parseInt(product.quantity) > 0 && parseInt(product.quantity) < 5">
-                                <span class="inline-flex items-center gap-1 text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-2 py-0.5 rounded-full">
+                                <span class="inline-flex items-center gap-0.5 text-[9px] md:text-[10px] font-semibold bg-amber-50 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-full">
                                     <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse inline-block"></span>
                                     Kam!
                                 </span>
@@ -123,40 +142,36 @@
                     </div>
 
                     <!-- Body -->
-                    <div class="px-4 pb-3 flex-1 space-y-2">
+                    <div class="px-3 md:px-4 pb-2 md:pb-3 flex-1 space-y-1.5 md:space-y-2">
                         <div class="flex items-center justify-between">
-                            <span class="text-xs text-slate-400">Narxi</span>
-                            <span class="text-sm font-semibold text-slate-700" x-text="parseFloat(product.price).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m'"></span>
+                            <span class="text-[10px] md:text-xs text-slate-400">Narxi</span>
+                            <span class="text-[11px] md:text-sm font-semibold text-slate-700" x-text="parseFloat(product.price).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m'"></span>
                         </div>
                         <template x-if="product.cost_price && parseFloat(product.cost_price) > 0">
                             <div class="flex items-center justify-between">
-                                <span class="text-xs text-slate-400">Tannarx</span>
-                                <span class="text-xs font-medium text-slate-500" x-text="parseFloat(product.cost_price).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m'"></span>
+                                <span class="text-[10px] md:text-xs text-slate-400">Tannarx</span>
+                                <span class="text-[10px] md:text-xs font-medium text-slate-500" x-text="parseFloat(product.cost_price).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m'"></span>
                             </div>
                         </template>
                         <div class="flex items-center justify-between">
-                            <span class="text-xs text-slate-400">Qoldiq</span>
-                            <div class="flex items-center gap-1.5">
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border"
+                            <span class="text-[10px] md:text-xs text-slate-400">Qoldiq</span>
+                            <div class="flex items-center gap-1">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] md:text-xs font-semibold border"
                                       :class="parseInt(product.quantity) === 0
                                         ? 'bg-red-50 text-red-700 border-red-200'
                                         : parseInt(product.quantity) < 5
                                           ? 'bg-amber-50 text-amber-700 border-amber-200'
                                           : 'bg-blue-50 text-blue-700 border-blue-100'"
                                       x-text="product.quantity + ' dona'"></span>
-                                <template x-if="product.unit_type && product.unit_value">
-                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500 border border-slate-200"
-                                          x-text="product.unit_value + ' ' + product.unit_type"></span>
-                                </template>
                             </div>
                         </div>
                         <template x-if="product.description">
-                            <p class="text-xs text-slate-400 pt-1 border-t border-slate-100 leading-relaxed" x-text="product.description"></p>
+                            <p class="text-[10px] md:text-xs text-slate-400 pt-1 border-t border-slate-100 leading-relaxed line-clamp-2" x-text="product.description"></p>
                         </template>
                     </div>
 
                     <!-- Updated at -->
-                    <div class="px-4 pb-2.5 flex items-center gap-1.5">
+                    <div class="hidden md:flex px-4 pb-2.5 items-center gap-1.5">
                         <svg class="w-3 h-3 text-slate-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         <span class="text-[10px] text-slate-400" x-text="formatDate(product.updated_at)"></span>
                     </div>
@@ -164,17 +179,18 @@
                     <!-- Actions -->
                     <div class="border-t flex" :class="parseInt(product.quantity) === 0 ? 'border-red-100' : 'border-slate-100'">
                         <button @click="editProduct(product)"
-                            class="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium transition-colors border-r"
+                            class="flex-1 flex items-center justify-center gap-1 md:gap-1.5 py-2.5 md:py-3 text-[11px] md:text-xs font-medium transition-colors border-r active:scale-95"
                             :class="parseInt(product.quantity) === 0
                                 ? 'text-red-600 bg-red-50/50 hover:bg-red-100 border-red-100 font-bold'
                                 : 'text-slate-500 hover:text-blue-600 hover:bg-blue-50 border-slate-100'">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                             </svg>
-                            Tahrirlash
+                            <span class="hidden sm:inline">Tahrirlash</span>
+                            <span class="sm:hidden">Tahrirla</span>
                         </button>
                         <button @click="deleteProduct(product.id)"
-                            class="flex-1 flex items-center justify-center gap-1.5 py-2.5 text-xs font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors">
+                            class="flex-1 flex items-center justify-center gap-1 md:gap-1.5 py-2.5 md:py-3 text-[11px] md:text-xs font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 transition-colors active:scale-95">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                             </svg>

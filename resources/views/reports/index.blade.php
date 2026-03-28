@@ -30,34 +30,31 @@
 {{-- ══ STICKY HEADER + TABS ══════════════════════════════════════════ --}}
 <div class="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
     {{-- Top bar --}}
-    <div class="max-w-7xl mx-auto px-5 py-3 flex flex-col sm:flex-row sm:items-center gap-2.5">
+    <div class="max-w-7xl mx-auto px-4 md:px-5 py-3 flex items-center gap-3">
         <div class="flex-1 min-w-0">
             <h1 class="text-base font-black text-slate-800 leading-tight">Hisobotlar</h1>
-            <p class="text-xs text-slate-400">
+            <p class="text-[11px] text-slate-400 hidden sm:block">
                 {{ \Carbon\Carbon::parse($startDate)->format('d.m.Y') }}
                 @if($startDate !== $endDate) — {{ \Carbon\Carbon::parse($endDate)->format('d.m.Y') }} @endif
-                oralig'i
             </p>
         </div>
-        <div class="flex items-center gap-2 shrink-0">
-            <form action="{{ url('/reports') }}" method="GET" class="flex items-center gap-2">
-                <div class="flex items-center rounded-xl overflow-hidden divide-x divide-slate-100 bg-slate-50 border border-slate-200">
-                    <input type="date" name="start_date" value="{{ $startDate }}"
-                        class="pl-3 pr-2 py-2 text-xs font-medium text-slate-600 focus:outline-none [color-scheme:light] bg-transparent cursor-pointer w-[118px]">
-                    <input type="date" name="end_date" value="{{ $endDate }}"
-                        class="pl-3 pr-2 py-2 text-xs font-medium text-slate-600 focus:outline-none [color-scheme:light] bg-transparent cursor-pointer w-[118px]">
-                </div>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                    Filter
-                </button>
-            </form>
-            <button @click="openClearDay()"
-                class="flex items-center gap-1.5 bg-white border border-red-200 hover:bg-red-50 text-red-600 font-semibold text-xs py-2 px-3 rounded-xl transition-all">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                Kunni o'chirish
+        <form action="{{ url('/reports') }}" method="GET" class="flex items-center gap-1.5 shrink-0">
+            <div class="flex items-center rounded-xl overflow-hidden divide-x divide-slate-200 bg-slate-50 border border-slate-200 shadow-sm">
+                <input type="date" name="start_date" value="{{ $startDate }}"
+                    class="px-2 py-2 text-xs font-medium text-slate-600 focus:outline-none [color-scheme:light] bg-transparent cursor-pointer w-[112px] md:w-[118px]">
+                <input type="date" name="end_date" value="{{ $endDate }}"
+                    class="px-2 py-2 text-xs font-medium text-slate-600 focus:outline-none [color-scheme:light] bg-transparent cursor-pointer w-[112px] md:w-[118px]">
+            </div>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white p-2 md:px-3 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                <span class="hidden md:inline text-xs font-bold">Filter</span>
             </button>
-        </div>
+        </form>
+        <button @click="openClearDay()"
+            class="flex items-center gap-1.5 bg-white border border-red-200 hover:bg-red-50 active:bg-red-100 text-red-600 font-semibold text-xs p-2 md:px-3 rounded-xl transition-all shadow-sm">
+            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            <span class="hidden md:inline">Kunni o'chirish</span>
+        </button>
     </div>
     {{-- Tab bar --}}
     <div class="max-w-7xl mx-auto px-5 flex items-end gap-0.5 overflow-x-auto">
@@ -94,7 +91,7 @@
     </div>
 </div>
 
-<main class="p-5 max-w-7xl mx-auto space-y-5">
+<main class="p-4 md:p-5 pb-24 md:pb-8 max-w-7xl mx-auto space-y-4 md:space-y-5">
 
     {{-- ══ 3 MAIN CARDS ════════════════════════════════════════════════ --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">

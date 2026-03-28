@@ -25,7 +25,7 @@
     </div>
 
     <!-- Main -->
-    <main class="p-4 md:p-8">
+    <main class="p-3 md:p-8 pb-24 md:pb-8">
 
         <!-- Empty state -->
         <div x-show="customers.length === 0" class="flex flex-col items-center justify-center py-24">
@@ -46,7 +46,7 @@
         </div>
 
         <!-- Customers Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 md:gap-4">
             <template x-for="(customer, index) in customers" :key="customer.id">
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col"
                      :style="`animation: fadeInUp .3s ease both; animation-delay: ${index * 40}ms`">
