@@ -3,8 +3,12 @@
 
 @section('head')
 <style>
-    .pos-left  { height: calc(100vh - 64px); overflow-y: auto; }
-    .pos-right { height: calc(100vh - 64px); overflow-y: auto; }
+    .pos-left  { height: calc(100dvh - 3.5rem); overflow-y: auto; }
+    .pos-right { height: calc(100dvh - 3.5rem); overflow-y: auto; }
+    @media (min-width: 768px) {
+        .pos-left  { height: calc(100dvh - 4rem); }
+        .pos-right { height: calc(100dvh - 4rem); }
+    }
     
     /* Smooth animations */
     @keyframes slideInCart { from { opacity: 0; transform: translateX(12px) scale(0.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
@@ -123,7 +127,7 @@
     </div>
 
     <!-- ── POS VIEW ─────────────────────────────────────────────── -->
-    <div class="flex flex-1 overflow-hidden" style="height: calc(100vh - 64px);">
+    <div class="flex flex-1 overflow-hidden h-[calc(100dvh-3.5rem)] md:h-[calc(100dvh-4rem)]">
 
         <!-- LEFT: Product panel -->
         <div class="flex-1 flex flex-col border-r border-slate-200 bg-gradient-to-b from-slate-50 to-slate-100 pos-left">
@@ -354,44 +358,40 @@
     </div>
 
     <!-- ── MOBILE: Floating bottom bar ─────────────────────────── -->
-    <div class="pos-mobile-bar fixed bottom-0 left-0 right-0 z-[150] md:hidden bg-white border-t border-slate-200 px-4 py-3 flex items-center gap-3">
-        <div class="flex-1 min-w-0">
-            <p class="text-[10px] text-slate-400 font-medium uppercase">Savatcha</p>
-            <p class="text-base font-black text-blue-700 leading-tight" x-text="cartTotal > 0 ? formatMoney(cartTotal) + ' so\'m' : 'Bo\'sh'"></p>
-        </div>
-        <!-- Pay method quick select -->
-        <div class="flex gap-1.5">
-            <button @click="sellForm.payment_method = 'naqd'"
-                :class="sellForm.payment_method === 'naqd' ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-slate-500 border-slate-200'"
-                class="px-2.5 py-2 text-[11px] font-bold rounded-lg border transition-all">Naqd</button>
-            <button @click="sellForm.payment_method = 'karta'"
-                :class="sellForm.payment_method === 'karta' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-500 border-slate-200'"
-                class="px-2.5 py-2 text-[11px] font-bold rounded-lg border transition-all">Karta</button>
-            <button @click="sellForm.payment_method = 'nasiya'"
-                :class="sellForm.payment_method === 'nasiya' ? 'bg-orange-500 text-white border-orange-500' : 'bg-white text-slate-500 border-slate-200'"
-                class="px-2.5 py-2 text-[11px] font-bold rounded-lg border transition-all">Nasiya</button>
-        </div>
-        <!-- Cart toggle / checkout button -->
-        <template x-if="cart.length === 0">
-            <button class="flex items-center gap-2 px-4 py-2.5 bg-slate-100 text-slate-400 rounded-xl font-bold text-sm" disabled>
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5"/></svg>
-                Savatcha
-            </button>
-        </template>
-        <template x-if="cart.length > 0 && !sellForm.payment_method">
+    <div class="pos-mobile-bar fixed bottom-0 left-0 right-0 z-[150] md:hidden bg-white/95 backdrop-blur-sm border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+         x-show="!showCartMobile"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-end="opacity-100 translate-y-0"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-2"
+         style="padding-bottom:env(safe-area-inset-bottom,0px)">
+        <div class="flex items-center gap-3 px-4 py-3">
+            <!-- Total info -->
+            <div class="flex-1 min-w-0">
+                <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wide leading-tight"
+                   x-text="cartCount > 0 ? cartCount + ' mahsulot tanlandi' : 'Mahsulot tanlanmagan'"></p>
+                <p class="text-lg font-black leading-tight transition-colors duration-200"
+                   :class="cartTotal > 0 ? 'text-blue-700' : 'text-slate-300'"
+                   x-text="cartTotal > 0 ? formatMoney(cartTotal) + ' so\'m' : '— — —'"></p>
+            </div>
+            <!-- Open cart sheet -->
             <button @click="showCartMobile = true"
-                class="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-blue-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5"/></svg>
-                <span x-text="cartCount"></span>
+                :disabled="cart.length === 0"
+                :class="cart.length > 0
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200/60 active:scale-95 active:shadow-none'
+                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'"
+                class="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-150">
+                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5"/>
+                </svg>
+                <span x-text="cart.length === 0 ? 'Bo\'sh' : 'Savatcha'"></span>
+                <span x-show="cart.length > 0"
+                      class="bg-white/30 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                      x-text="cartCount"></span>
             </button>
-        </template>
-        <template x-if="cart.length > 0 && sellForm.payment_method">
-            <button @click="openSellModal()"
-                class="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-emerald-600 to-green-600 text-white rounded-xl font-bold text-sm shadow-lg shadow-emerald-200">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Sotish
-            </button>
-        </template>
+        </div>
     </div>
 
     <!-- ── HISTORY/REPORT MODAL ────────────────────────────────── -->

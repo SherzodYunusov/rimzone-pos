@@ -30,43 +30,79 @@
 {{-- ══ STICKY HEADER + TABS ══════════════════════════════════════════ --}}
 <div class="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
     {{-- Top bar --}}
-    <div class="max-w-7xl mx-auto px-4 md:px-5 py-3 flex items-center gap-3">
-        <div class="flex-1 min-w-0">
-            <h1 class="text-base font-black text-slate-800 leading-tight">Hisobotlar</h1>
-            <p class="text-[11px] text-slate-400 hidden sm:block">
-                {{ \Carbon\Carbon::parse($startDate)->format('d.m.Y') }}
-                @if($startDate !== $endDate) — {{ \Carbon\Carbon::parse($endDate)->format('d.m.Y') }} @endif
-            </p>
-        </div>
-        <form action="{{ url('/reports') }}" method="GET" class="flex items-center gap-1.5 shrink-0">
-            <div class="flex items-center rounded-xl overflow-hidden divide-x divide-slate-200 bg-slate-50 border border-slate-200 shadow-sm">
-                <input type="date" name="start_date" value="{{ $startDate }}"
-                    class="px-2 py-2 text-xs font-medium text-slate-600 focus:outline-none [color-scheme:light] bg-transparent cursor-pointer w-[112px] md:w-[118px]">
-                <input type="date" name="end_date" value="{{ $endDate }}"
-                    class="px-2 py-2 text-xs font-medium text-slate-600 focus:outline-none [color-scheme:light] bg-transparent cursor-pointer w-[112px] md:w-[118px]">
+    <div class="max-w-7xl mx-auto px-4 md:px-5 py-3">
+
+        {{-- ── MOBILE layout (< md): 2 rows ─────────────────────────── --}}
+        <div class="md:hidden">
+            {{-- Row 1: Title + Delete --}}
+            <div class="flex items-center justify-between mb-2">
+                <div>
+                    <h1 class="text-base font-black text-slate-800 leading-tight">Hisobotlar</h1>
+                    <p class="text-[11px] text-slate-400">
+                        {{ \Carbon\Carbon::parse($startDate)->format('d.m.Y') }}
+                        @if($startDate !== $endDate) — {{ \Carbon\Carbon::parse($endDate)->format('d.m.Y') }} @endif
+                    </p>
+                </div>
+                <button @click="openClearDay()"
+                    class="flex items-center gap-1 bg-white border border-red-200 hover:bg-red-50 active:bg-red-100 text-red-600 p-2 rounded-xl transition-all shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
             </div>
-            <button type="submit" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white p-2 md:px-3 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
-                <span class="hidden md:inline text-xs font-bold">Filter</span>
+            {{-- Row 2: Full-width filter form --}}
+            <form action="{{ url('/reports') }}" method="GET" class="flex items-center gap-2">
+                <div class="flex-1 flex items-center rounded-xl overflow-hidden divide-x divide-slate-200 bg-slate-50 border border-slate-200 shadow-sm min-w-0">
+                    <input type="date" name="start_date" value="{{ $startDate }}"
+                        class="flex-1 min-w-0 px-2 py-2 text-xs font-medium text-slate-600 focus:outline-none [color-scheme:light] bg-transparent cursor-pointer">
+                    <input type="date" name="end_date" value="{{ $endDate }}"
+                        class="flex-1 min-w-0 px-2 py-2 text-xs font-medium text-slate-600 focus:outline-none [color-scheme:light] bg-transparent cursor-pointer">
+                </div>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-4 py-2 rounded-xl flex items-center gap-1.5 shadow-sm shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                    <span class="text-xs font-bold">Filter</span>
+                </button>
+            </form>
+        </div>
+
+        {{-- ── DESKTOP layout (≥ md): single row ────────────────────── --}}
+        <div class="hidden md:flex items-center gap-3">
+            <div class="flex-1 min-w-0">
+                <h1 class="text-base font-black text-slate-800 leading-tight">Hisobotlar</h1>
+                <p class="text-[11px] text-slate-400">
+                    {{ \Carbon\Carbon::parse($startDate)->format('d.m.Y') }}
+                    @if($startDate !== $endDate) — {{ \Carbon\Carbon::parse($endDate)->format('d.m.Y') }} @endif
+                </p>
+            </div>
+            <form action="{{ url('/reports') }}" method="GET" class="flex items-center gap-1.5 shrink-0">
+                <div class="flex items-center rounded-xl overflow-hidden divide-x divide-slate-200 bg-slate-50 border border-slate-200 shadow-sm">
+                    <input type="date" name="start_date" value="{{ $startDate }}"
+                        class="px-2 py-2 text-xs font-medium text-slate-600 focus:outline-none [color-scheme:light] bg-transparent cursor-pointer w-[118px]">
+                    <input type="date" name="end_date" value="{{ $endDate }}"
+                        class="px-2 py-2 text-xs font-medium text-slate-600 focus:outline-none [color-scheme:light] bg-transparent cursor-pointer w-[118px]">
+                </div>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white px-3 py-2 rounded-xl transition-all flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                    <span class="text-xs font-bold">Filter</span>
+                </button>
+            </form>
+            <button @click="openClearDay()"
+                class="flex items-center gap-1.5 bg-white border border-red-200 hover:bg-red-50 active:bg-red-100 text-red-600 font-semibold text-xs px-3 py-2 rounded-xl transition-all shadow-sm">
+                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Kunni o'chirish
             </button>
-        </form>
-        <button @click="openClearDay()"
-            class="flex items-center gap-1.5 bg-white border border-red-200 hover:bg-red-50 active:bg-red-100 text-red-600 font-semibold text-xs p-2 md:px-3 rounded-xl transition-all shadow-sm">
-            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-            <span class="hidden md:inline">Kunni o'chirish</span>
-        </button>
+        </div>
+
     </div>
     {{-- Tab bar --}}
-    <div class="max-w-7xl mx-auto px-5 flex items-end gap-0.5 overflow-x-auto">
+    <div class="max-w-7xl mx-auto px-4 md:px-5 flex items-end gap-0.5 overflow-x-auto scrollbar-hide">
         <button @click="activeTab='overview'"
             :class="activeTab==='overview' ? 'border-blue-600 text-blue-700 bg-blue-50/50' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'"
-            class="flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap">
+            class="flex items-center gap-1.5 px-3 md:px-4 py-2.5 text-xs md:text-sm font-bold border-b-2 transition-all whitespace-nowrap">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
             Umumiy
         </button>
         <button @click="activeTab='nasiya'"
             :class="activeTab==='nasiya' ? 'border-amber-500 text-amber-700 bg-amber-50/50' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'"
-            class="flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap">
+            class="flex items-center gap-1.5 px-3 md:px-4 py-2.5 text-xs md:text-sm font-bold border-b-2 transition-all whitespace-nowrap">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
             Nasiya
             @if($allDebtSales->count() > 0)
@@ -77,13 +113,13 @@
         </button>
         <button @click="activeTab='products'"
             :class="activeTab==='products' ? 'border-violet-600 text-violet-700 bg-violet-50/50' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'"
-            class="flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap">
+            class="flex items-center gap-1.5 px-3 md:px-4 py-2.5 text-xs md:text-sm font-bold border-b-2 transition-all whitespace-nowrap">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-            Mahsulotlar
+            <span class="hidden sm:inline">Mahsulotlar</span><span class="sm:hidden">Mahsulot</span>
         </button>
         <button @click="activeTab='sales'"
             :class="activeTab==='sales' ? 'border-teal-600 text-teal-700 bg-teal-50/50' : 'border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50'"
-            class="flex items-center gap-1.5 px-4 py-2.5 text-sm font-bold border-b-2 transition-all whitespace-nowrap">
+            class="flex items-center gap-1.5 px-3 md:px-4 py-2.5 text-xs md:text-sm font-bold border-b-2 transition-all whitespace-nowrap">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
             Savdolar
             <span class="px-1.5 py-0.5 text-[10px] font-black bg-slate-100 text-slate-500 rounded-full">{{ count($sales) }}</span>
@@ -346,7 +382,7 @@
 
         {{-- Summary Stats Bar --}}
         @if(!$allDebtSales->isEmpty())
-        <div class="grid grid-cols-3 gap-4 mb-5">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-5">
             <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4">
                 <div class="flex items-center gap-2 mb-1.5">
                     <div class="w-6 h-6 rounded-lg bg-emerald-100 flex items-center justify-center">
@@ -415,13 +451,13 @@
                 <table class="w-full text-left">
                     <thead>
                         <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-bold text-slate-400 uppercase tracking-widest">
-                            <th class="px-5 py-3">Mijoz</th>
-                            <th class="px-5 py-3 text-right">Jami</th>
-                            <th class="px-5 py-3 text-right">To'langan</th>
-                            <th class="px-5 py-3 text-right">Qolgan</th>
-                            <th class="px-5 py-3 text-center">Muddat</th>
-                            <th class="px-5 py-3 text-center">Holat</th>
-                            <th class="px-5 py-3 text-right">Amal</th>
+                            <th class="px-3 md:px-5 py-3">Mijoz</th>
+                            <th class="px-3 md:px-5 py-3 text-right hidden sm:table-cell">Jami</th>
+                            <th class="px-3 md:px-5 py-3 text-right hidden sm:table-cell">To'langan</th>
+                            <th class="px-3 md:px-5 py-3 text-right">Qolgan</th>
+                            <th class="px-3 md:px-5 py-3 text-center">Muddat</th>
+                            <th class="px-3 md:px-5 py-3 text-center hidden sm:table-cell">Holat</th>
+                            <th class="px-3 md:px-5 py-3 text-right">Amal</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -436,7 +472,7 @@
                         {{-- Main debt row --}}
                         <tr x-show="debtFilter==='all' || (debtFilter==='overdue' && {{ $rowFilter }})"
                             class="border-b border-slate-100 transition-colors hover:bg-slate-50/60 {{ $isOverdue ? 'debt-row-overdue' : ($isPartial ? 'debt-row-partial' : '') }}">
-                            <td class="px-5 py-3">
+                            <td class="px-3 md:px-5 py-3">
                                 <div class="flex items-center gap-2.5">
                                     <div class="w-2 h-2 rounded-full shrink-0 {{ $isOverdue ? 'bg-red-500 overdue-pulse' : ($isPartial ? 'bg-amber-400' : 'bg-orange-400') }}"></div>
                                     <div>
@@ -450,12 +486,12 @@
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-5 py-3 text-right text-sm font-semibold text-slate-700">{{ number_format($debtSale->total_price,0,',',' ') }} so'm</td>
-                            <td class="px-5 py-3 text-right text-sm font-semibold {{ $debtSale->paid_amount > 0 ? 'text-emerald-600' : 'text-slate-400' }}">{{ number_format($debtSale->paid_amount,0,',',' ') }} so'm</td>
-                            <td class="px-5 py-3 text-right text-sm font-black {{ $isOverdue ? 'text-red-600' : 'text-orange-600' }}">{{ number_format($remaining,0,',',' ') }} so'm</td>
-                            <td class="px-5 py-3 text-center">
+                            <td class="px-3 md:px-5 py-3 text-right text-sm font-semibold text-slate-700 hidden sm:table-cell">{{ number_format($debtSale->total_price,0,',',' ') }} so'm</td>
+                            <td class="px-3 md:px-5 py-3 text-right text-sm font-semibold {{ $debtSale->paid_amount > 0 ? 'text-emerald-600' : 'text-slate-400' }} hidden sm:table-cell">{{ number_format($debtSale->paid_amount,0,',',' ') }} so'm</td>
+                            <td class="px-3 md:px-5 py-3 text-right text-sm font-black {{ $isOverdue ? 'text-red-600' : 'text-orange-600' }}">{{ number_format($remaining,0,',',' ') }} so'm</td>
+                            <td class="px-3 md:px-5 py-3 text-center">
                                 @if($debtSale->due_date)
-                                <span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-bold {{ $isOverdue ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200' }}">
+                                <span class="inline-flex items-center gap-1 px-1.5 md:px-2 py-1 rounded-lg text-[11px] md:text-xs font-bold {{ $isOverdue ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-slate-100 text-slate-600 border border-slate-200' }}">
                                     @if($isOverdue)<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>@endif
                                     {{ \Carbon\Carbon::parse($debtSale->due_date)->format('d.m.Y') }}
                                 </span>
@@ -463,7 +499,7 @@
                                 <span class="text-xs text-slate-400">—</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3 text-center">
+                            <td class="px-3 md:px-5 py-3 text-center hidden sm:table-cell">
                                 @if($isOverdue)
                                 <span class="px-2 py-1 rounded-lg text-xs font-bold bg-red-100 text-red-700 border border-red-200">Muddati o'tgan</span>
                                 @elseif($isPartial)
@@ -472,7 +508,7 @@
                                 <span class="px-2 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">Kutilmoqda</span>
                                 @endif
                             </td>
-                            <td class="px-5 py-3 text-right">
+                            <td class="px-3 md:px-5 py-3 text-right">
                                 <div class="flex items-center justify-end gap-1.5">
                                     @if($debtSale->payments->isNotEmpty())
                                     <button @click="openHistoryId = (openHistoryId === {{ $debtSale->id }} ? null : {{ $debtSale->id }})"
@@ -534,9 +570,12 @@
                     </tbody>
                     <tfoot class="bg-slate-50 border-t-2 border-slate-200">
                         <tr>
-                            <td colspan="3" class="px-5 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide">Jami qolgan qarz</td>
-                            <td class="px-5 py-3 text-right font-black text-orange-600">{{ number_format($totalNasiya,0,',',' ') }} so'm</td>
-                            <td colspan="3"></td>
+                            <td colspan="7" class="px-3 md:px-5 py-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Jami qolgan qarz</span>
+                                    <span class="font-black text-orange-600">{{ number_format($totalNasiya,0,',',' ') }} so'm</span>
+                                </div>
+                            </td>
                         </tr>
                     </tfoot>
                 </table>
