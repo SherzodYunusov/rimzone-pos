@@ -123,4 +123,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'secret_keyword' => env('SECRET_KEYWORD', ''),
+
 ];
