@@ -49,4 +49,7 @@ Route::middleware(['auth', 'nocache'])->group(function () {
     // Hisobotlar
     Route::get('/reports', [App\Http\Controllers\ReportController::class, 'index']);
     Route::delete('/reports/clear-day', [App\Http\Controllers\ReportController::class, 'clearDay']);
+
+    // Chek (receipt)
+    Route::get('/receipts/{sale}', [App\Http\Controllers\ReceiptController::class, 'show']);
 });

@@ -633,6 +633,55 @@
         </div>
     </div>
 
+    <!-- ── PRINT MODAL ─────────────────────────────────────────── -->
+    <div x-show="showPrintModal" x-cloak style="display:none"
+         class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-sm overflow-hidden"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-90"
+             x-transition:enter-end="opacity-100 scale-100">
+
+            <!-- Icon + Title -->
+            <div class="flex flex-col items-center px-6 pt-7 pb-5 text-center">
+                <div class="w-16 h-16 rounded-2xl bg-emerald-50 border-2 border-emerald-200 flex items-center justify-center mb-4">
+                    <svg class="w-8 h-8 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-black text-slate-800 mb-1">Chek chiqarasizmi?</h3>
+                <p class="text-sm text-slate-500">Savdo muvaffaqiyatli amalga oshirildi.<br>Printerdan chek bosib chiqarish mumkin.</p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 px-5 pb-6">
+                <button @click="skipPrint()"
+                        class="flex-1 px-4 py-3 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all">
+                    Kerak emas
+                </button>
+                <button @click="printReceipt()" :disabled="printLoading"
+                        class="flex-1 px-4 py-3 text-sm font-bold text-white bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 rounded-xl transition-all disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg shadow-emerald-200">
+                    <svg x-show="printLoading" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    <svg x-show="!printLoading" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                              d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                    </svg>
+                    <span x-text="printLoading ? 'Chiqarilmoqda...' : 'Ha, chiqarish'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+
 </div>
 @endsection
 
@@ -653,6 +702,9 @@ function posApp() {
         loading: false,
         pulseCart: false,
         showCartMobile: false,
+        showPrintModal: false,
+        pendingSaleId: null,
+        printLoading: false,
 
         _qtyTimers: {},   // debounce timer handles per product id
         totalFlash: false,
@@ -846,13 +898,54 @@ function posApp() {
                     });
                     this.clearCart();
                     this.isSellOpen = false;
-                    this.showNotif('✓ Savdo muvaffaqiyatli amalga oshirildi!', 'success');
+                    this.showCartMobile = false;
+                    // Chek modal ochish
+                    this.pendingSaleId = d.sale.id;
+                    this.showPrintModal = true;
                 }
             })
             .catch(e => {
                 if (e.message !== 'Validation error') this.showNotif(e.message, 'error');
             })
             .finally(() => { this.loading = false; });
+        },
+
+        /* ─── Print Receipt ─────────────────────────────────────── */
+        printReceipt() {
+            if (!this.pendingSaleId) return;
+            this.printLoading = true;
+
+            // Eski iframe bo'lsa o'chirish
+            const old = document.getElementById('receipt-iframe');
+            if (old) old.remove();
+
+            const iframe = document.createElement('iframe');
+            iframe.id = 'receipt-iframe';
+            iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:0;height:0;border:none;';
+            iframe.src = '/receipts/' + this.pendingSaleId;
+            document.body.appendChild(iframe);
+
+            iframe.onload = () => {
+                try {
+                    iframe.contentWindow.focus();
+                    iframe.contentWindow.print();
+                } catch(e) {
+                    // Fallback: yangi tabda ochish
+                    window.open('/receipts/' + this.pendingSaleId, '_blank');
+                }
+                this.printLoading = false;
+                this.showPrintModal = false;
+                this.pendingSaleId = null;
+                this.showNotif('✓ Savdo amalga oshirildi!', 'success');
+                // iframe ni biroz keyin o'chirish (print dialog yopilishi uchun)
+                setTimeout(() => { iframe.remove(); }, 3000);
+            };
+        },
+
+        skipPrint() {
+            this.showPrintModal = false;
+            this.pendingSaleId = null;
+            this.showNotif('✓ Savdo amalga oshirildi!', 'success');
         },
 
         /* ─── History Delete ────────────────────────────────────── */
