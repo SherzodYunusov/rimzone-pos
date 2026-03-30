@@ -120,7 +120,7 @@
             <h1 class="text-base md:text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">POS</h1>
             <span class="px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200 transition-all duration-300 animate-pulse-soft"
                   :class="pulseCart ? 'active bg-blue-100 ring-2 ring-blue-300 shadow-lg shadow-blue-200' : ''"
-                  x-text="cartCount + ' dona'"></span>
+                  x-text="cartCount + ' ta'"></span>
         </div>
 
         <div class="flex items-center gap-2">
@@ -575,7 +575,7 @@
                         class="w-full px-3 py-2.5 text-sm border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-700 bg-white shadow-sm">
                         <option value="">👤 Tanlash shart emas...</option>
                         <template x-for="customer in customers" :key="customer.id">
-                            <option :value="customer.id" x-text="`${customer.name} (${customer.company_name})`"></option>
+                            <option :value="customer.id" x-text="customer.company_name ? `${customer.name} (${customer.company_name})` : customer.name"></option>
                         </template>
                     </select>
                     <!-- Nasiya ogohlantirish -->

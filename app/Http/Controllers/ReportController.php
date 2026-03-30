@@ -95,7 +95,7 @@ class ReportController extends Controller
         $inventoryValue = Product::whereNotNull('cost_price')
             ->where('cost_price', '>', 0)
             ->get()
-            ->sum(fn($p) => (float) $p->cost_price * (int) $p->quantity);
+            ->sum(fn($p) => (float) $p->cost_price * (float) $p->quantity);
 
         $inventoryCount = Product::count();
         $inventoryItems = Product::select('name', 'cost_price', 'quantity')

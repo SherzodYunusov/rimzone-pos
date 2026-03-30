@@ -55,8 +55,9 @@ class SaleController extends Controller
                     $product = Product::lockForUpdate()->findOrFail($item['product_id']);
 
                     if ($product->quantity < $item['quantity']) {
+                        $unit = $product->unit ?: 'dona';
                         throw new \Exception(
-                            "«{$product->name}» uchun yetarli stok yo'q. Omborda: {$product->quantity} dona."
+                            "«{$product->name}» uchun yetarli stok yo'q. Omborda: {$product->quantity} {$unit}."
                         );
                     }
 
