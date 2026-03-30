@@ -155,7 +155,7 @@
             </div>
 
             <!-- Product Grid -->
-            <div class="flex-1 overflow-y-auto p-3 md:p-4 pb-24 md:pb-4">
+            <div class="flex-1 overflow-y-auto p-3 md:p-4 pb-28 md:pb-4">
                 <div class="grid grid-cols-2 xl:grid-cols-3 gap-2 md:gap-3">
                     <template x-for="(product, idx) in filteredProducts" :key="product.id">
                         <div class="product-card animate-fade-up rounded-xl p-3 md:p-4 flex flex-col gap-2 md:gap-3 cursor-pointer"
@@ -259,14 +259,16 @@
             <!-- Cart items scroll area -->
             <div class="flex-1 overflow-y-auto p-4 cart-glow">
                 <!-- Empty state -->
-                <div x-show="cart.length === 0" class="flex flex-col items-center justify-center h-full pb-10 text-center">
-                    <div class="w-20 h-20 rounded-2xl bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center mb-4">
-                        <svg class="w-10 h-10 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5"/>
+                <div x-show="cart.length === 0" class="flex flex-col items-center justify-center h-full pb-6 text-center gap-3">
+                    <div class="w-24 h-24 rounded-3xl bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center shadow-inner">
+                        <svg class="w-12 h-12 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                         </svg>
                     </div>
-                    <p class="text-sm font-medium text-slate-500">Savatcha bo'sh</p>
-                    <p class="text-xs text-slate-400 mt-2">Mahsulot qo'shish uchun <span class="font-bold text-blue-600">+</span> bosing</p>
+                    <div>
+                        <p class="text-base font-bold text-slate-700">Savatcha bo'sh</p>
+                        <p class="text-xs text-slate-400 mt-1">Chapdan mahsulot <span class="font-bold text-blue-500">+</span> tugmasini bosing</p>
+                    </div>
                 </div>
 
                 <!-- Cart items -->
@@ -315,7 +317,7 @@
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-slate-600 font-medium">Mahsulotlar jami:</span>
-                        <span class="text-sm font-bold text-slate-800" x-text="cartCount + ' dona'"></span>
+                        <span class="text-sm font-bold text-slate-800" x-text="cartCount + ' ta'"></span>
                     </div>
                     <div class="h-0.5 bg-gradient-to-r from-blue-300 to-indigo-300 rounded-full"></div>
                 </div>
@@ -377,38 +379,54 @@
     </div>
 
     <!-- ── MOBILE: Floating bottom bar ─────────────────────────── -->
-    <div class="pos-mobile-bar fixed bottom-0 left-0 right-0 z-[150] md:hidden bg-white/95 backdrop-blur-sm border-t border-slate-200 shadow-[0_-4px_20px_rgba(0,0,0,0.08)]"
+    <div class="pos-mobile-bar fixed bottom-0 left-0 right-0 z-[150] md:hidden"
          x-show="!showCartMobile"
          x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 translate-y-2"
+         x-transition:enter-start="opacity-0 translate-y-4"
          x-transition:enter-end="opacity-100 translate-y-0"
          x-transition:leave="transition ease-in duration-150"
          x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 translate-y-2"
+         x-transition:leave-end="opacity-0 translate-y-4"
          style="padding-bottom:env(safe-area-inset-bottom,0px)">
-        <div class="flex items-center gap-3 px-4 py-3">
-            <!-- Total info -->
-            <div class="flex-1 min-w-0">
-                <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wide leading-tight"
-                   x-text="cartCount > 0 ? cartCount + ' mahsulot tanlandi' : 'Mahsulot tanlanmagan'"></p>
-                <p class="text-lg font-black leading-tight transition-colors duration-200"
-                   :class="cartTotal > 0 ? 'text-blue-700' : 'text-slate-300'"
-                   x-text="cartTotal > 0 ? formatMoney(cartTotal) + ' so\'m' : '— — —'"></p>
-            </div>
-            <!-- Open cart sheet -->
-            <button @click="showCartMobile = true"
-                :disabled="cart.length === 0"
-                :class="cart.length > 0
-                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200/60 active:scale-95 active:shadow-none'
-                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'"
-                class="flex items-center gap-2 px-5 py-2.5 rounded-2xl font-bold text-sm transition-all duration-150">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5"/>
+
+        <!-- Cart is empty: soft minimal bar -->
+        <div x-show="cart.length === 0"
+             class="mx-4 mb-4 px-5 py-3 bg-white/90 backdrop-blur-md border border-slate-200 rounded-2xl shadow-lg flex items-center justify-between">
+            <div class="flex items-center gap-2 text-slate-400">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                 </svg>
-                <span x-text="cart.length === 0 ? 'Bo\'sh' : 'Savatcha'"></span>
-                <span x-show="cart.length > 0"
-                      class="bg-white/30 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shrink-0"
-                      x-text="cartCount"></span>
+                <span class="text-sm font-medium">Savatcha bo'sh</span>
+            </div>
+            <span class="text-xs text-slate-300 font-medium">mahsulot tanlang</span>
+        </div>
+
+        <!-- Cart has items: full prominent bar -->
+        <div x-show="cart.length > 0"
+             class="mx-3 mb-3">
+            <button @click="showCartMobile = true"
+                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 active:from-blue-700 active:to-indigo-700 text-white rounded-2xl shadow-xl shadow-blue-400/30 active:shadow-none active:scale-[0.98] transition-all duration-150 overflow-hidden">
+                <div class="flex items-center justify-between px-5 py-3.5">
+                    <div class="flex items-center gap-3">
+                        <div class="relative">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                            </svg>
+                            <span class="absolute -top-1.5 -right-1.5 bg-white text-blue-600 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center"
+                                  x-text="cartCount"></span>
+                        </div>
+                        <div class="text-left">
+                            <p class="text-[10px] text-blue-200 font-medium leading-tight" x-text="cartCount + ' ta mahsulot'"></p>
+                            <p class="text-base font-black leading-tight" x-text="formatMoney(cartTotal) + ' so\'m'"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 bg-white/20 rounded-xl px-3 py-1.5">
+                        <span class="text-sm font-bold">Savatcha</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/>
+                        </svg>
+                    </div>
+                </div>
             </button>
         </div>
     </div>
