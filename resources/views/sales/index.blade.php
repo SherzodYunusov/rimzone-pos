@@ -160,13 +160,19 @@
                     <template x-for="(product, idx) in filteredProducts" :key="product.id">
                         <div class="product-card animate-fade-up rounded-xl p-3 md:p-4 flex flex-col gap-2 md:gap-3 cursor-pointer"
                              :style="`animation-delay: ${idx * 0.03}s`">
-                            <!-- Name & stock -->
+                            <!-- Name, narx, qoldiq -->
                             <div class="flex flex-col gap-1">
-                                <p class="text-xs md:text-sm font-bold text-slate-800 leading-tight line-clamp-2" x-text="product.name"></p>
-                                <div class="flex items-center justify-between gap-1">
-                                    <p class="text-xs md:text-sm text-blue-600 font-semibold" x-text="formatMoney(product.price) + ' so\'m'"></p>
-                                    <span class="text-xs font-bold px-2 py-0.5 rounded-lg border transition-all stock-badge"
-                                          :class="parseFloat(product.quantity) <= 0 ? 'bg-red-50 text-red-600 border-red-300' : parseFloat(product.quantity) <= 5 ? 'low bg-amber-50 text-amber-700 border-amber-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                                <p class="text-xs md:text-sm font-bold text-slate-800 leading-snug line-clamp-2" x-text="product.name"></p>
+                                <p class="text-xs md:text-sm font-semibold text-blue-600"
+                                   x-text="formatMoney(product.price) + ' so\'m / ' + (product.unit || 'dona')"></p>
+                                <div class="flex items-center gap-1">
+                                    <span class="text-[10px] font-medium text-slate-400">Ombor:</span>
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded-lg border stock-badge"
+                                          :class="parseFloat(product.quantity) <= 0
+                                            ? 'bg-red-50 text-red-600 border-red-300'
+                                            : parseFloat(product.quantity) <= 5
+                                              ? 'low bg-amber-50 text-amber-700 border-amber-300'
+                                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
                                           x-text="parseFloat(product.quantity) + ' ' + (product.unit || 'dona')"></span>
                                 </div>
                             </div>
