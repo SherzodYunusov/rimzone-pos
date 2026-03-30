@@ -178,7 +178,7 @@
     <div class="flex-1 flex flex-col min-h-screen overflow-auto page-enter min-w-0">
 
         <!-- Mobile top bar -->
-        <div class="md:hidden sticky top-0 z-30 h-14 bg-white/95 backdrop-blur-sm border-b border-slate-200 flex items-center px-4 gap-3 shrink-0 shadow-sm">
+        <div class="layout-mobile-topbar md:hidden sticky top-0 z-30 h-14 bg-white/95 backdrop-blur-sm border-b border-slate-200 flex items-center px-4 gap-3 shrink-0 shadow-sm">
             <button @click="sidebarOpen = true"
                     class="p-2 rounded-xl text-slate-500 hover:bg-slate-100 active:bg-slate-200 transition-colors shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

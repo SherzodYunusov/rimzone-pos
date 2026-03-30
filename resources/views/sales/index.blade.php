@@ -3,6 +3,11 @@
 
 @section('head')
 <style>
+    /* Hide layout's default mobile top bar — POS has its own */
+    @media (max-width: 767px) {
+        .layout-mobile-topbar { display: none !important; }
+    }
+
     .pos-left  { height: calc(100dvh - 3.5rem); overflow-y: auto; }
     .pos-right { height: calc(100dvh - 3.5rem); overflow-y: auto; }
     @media (min-width: 768px) {
@@ -129,11 +134,11 @@
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <span class="hidden md:inline">Hisobot</span>
             </button>
-            {{-- Mobile nav link (since bottom nav is hidden on sales) --}}
-            <a href="{{ url('/products') }}"
-               class="md:hidden p-2 bg-white hover:bg-slate-50 text-slate-500 rounded-xl border border-slate-200 shadow-sm">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-            </a>
+            {{-- Mobile: open sidebar for navigation --}}
+            <button @click="$root.sidebarOpen = true"
+               class="md:hidden p-2.5 bg-white hover:bg-slate-50 text-slate-500 active:scale-95 rounded-xl border border-slate-200 shadow-sm transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
         </div>
     </div>
 
@@ -181,7 +186,7 @@
                             <div class="flex items-center gap-1.5">
                                 <div class="flex items-center bg-slate-100 border border-slate-200 rounded-lg overflow-hidden flex-1 shadow-sm">
                                     <button @click="decrement(product.id)"
-                                        class="qty-btn w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-600 font-bold color-transition shrink-0"
+                                        class="qty-btn w-10 h-10 md:w-9 md:h-9 flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-600 font-bold color-transition shrink-0"
                                         :disabled="!cartQty(product.id)">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
                                     </button>
@@ -195,16 +200,16 @@
                                         @input="debouncedSetQty(product, $event.target.value)"
                                         @focus="$event.target.select()"
                                         placeholder="—"
-                                        class="flex-1 w-0 min-w-0 text-center text-xs md:text-sm font-bold text-slate-800 bg-transparent border-none outline-none py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                        class="flex-1 w-0 min-w-0 text-center text-sm font-bold text-slate-800 bg-transparent border-none outline-none py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                                     <button @click="increment(product)"
-                                        class="qty-btn w-8 h-8 md:w-9 md:h-9 flex items-center justify-center text-slate-500 hover:bg-blue-100 hover:text-blue-600 font-bold color-transition shrink-0"
+                                        class="qty-btn w-10 h-10 md:w-9 md:h-9 flex items-center justify-center text-slate-500 hover:bg-blue-100 hover:text-blue-600 font-bold color-transition shrink-0"
                                         :disabled="cartQty(product.id) >= product.quantity">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                                     </button>
                                 </div>
                                 <button x-show="!cartQty(product.id)"
                                     @click="increment(product)"
-                                    class="shrink-0 h-8 md:h-9 px-2 md:px-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-[11px] md:text-xs font-bold rounded-lg transition-all shadow-sm hover:shadow-blue-300">
+                                    class="shrink-0 h-10 md:h-9 px-3 md:px-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 active:scale-95 text-white text-sm md:text-xs font-bold rounded-lg transition-all shadow-sm hover:shadow-blue-300">
                                     +
                                 </button>
                             </div>
@@ -285,10 +290,10 @@
                                 <div class="shrink-0 flex flex-col items-end gap-1.5">
                                     <p class="text-sm font-bold text-blue-700" x-text="formatMoney(item.price * item.qty) + ' so\'m'"></p>
                                     <!-- Mini stepper -->
-                                    <div class="flex items-center bg-slate-100 border border-slate-200 rounded-lg overflow-hidden">
+                                    <div class="flex items-center bg-slate-100 border border-slate-200 rounded-xl overflow-hidden">
                                         <button @click="decrement(item.id)"
-                                            class="w-7 h-7 flex items-center justify-center text-slate-400 hover:bg-red-100 hover:text-red-600 transition-colors text-xs font-bold">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                                            class="w-9 h-9 flex items-center justify-center text-slate-400 hover:bg-red-100 hover:text-red-600 active:scale-90 transition-all text-xs font-bold">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
                                         </button>
                                         <input
                                             type="number"
@@ -298,13 +303,13 @@
                                             :value="item.qty"
                                             @input="debouncedSetQtyById(item.id, $event.target.value)"
                                             @focus="$event.target.select()"
-                                            class="w-9 text-center text-xs font-bold text-slate-800 bg-transparent border-none outline-none py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                            class="w-10 text-center text-sm font-bold text-slate-800 bg-transparent border-none outline-none py-1 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
                                         <button @click="incrementById(item.id)"
-                                            class="w-7 h-7 flex items-center justify-center text-slate-400 hover:bg-blue-100 hover:text-blue-600 transition-colors text-xs font-bold">
-                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                            class="w-9 h-9 flex items-center justify-center text-slate-400 hover:bg-blue-100 hover:text-blue-600 active:scale-90 transition-all text-xs font-bold">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                                         </button>
                                     </div>
-                                    <button @click="removeFromCart(item.id)" class="text-[10px] text-slate-400 hover:text-red-600 transition-colors font-medium">O'chirish</button>
+                                    <button @click="removeFromCart(item.id)" class="text-xs text-slate-400 hover:text-red-500 transition-colors font-medium px-1 py-1">O'chirish</button>
                                 </div>
                             </div>
                         </div>
@@ -360,7 +365,7 @@
 
                 <button @click="openSellModal()"
                     :disabled="cart.length === 0 || !sellForm.payment_method"
-                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-400/40 disabled:shadow-none">
+                    class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-slate-300 disabled:to-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed active:scale-[0.98] text-white font-bold py-4 md:py-3 rounded-2xl transition-all text-base md:text-sm flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-400/40 disabled:shadow-none">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 12l2 2 4-4m7 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
