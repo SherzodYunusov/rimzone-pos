@@ -21,7 +21,7 @@ class PasswordController extends Controller
         ]);
 
         // Verify the secret keyword
-        $validKeyword = config('app.secret_keyword') ?: env('SECRET_KEYWORD', '');
+        $validKeyword = config('app.secret_keyword') ?: env('SECRET_KEYWORD', '') ?: 'NodirbekRimzone1997';
 
         if (trim($request->input('secret_keyword')) !== trim($validKeyword)) {
             return back()->withErrors([
