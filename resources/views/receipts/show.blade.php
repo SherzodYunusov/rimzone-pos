@@ -68,7 +68,7 @@
         align-items: center;
         font-size: 12px;
     }
-    .item-formula { color: #333; }   /* soni × narxi */
+    .item-formula { color: #000; font-weight: 900 !important; }
     .item-total   { font-size: 13px; font-weight: 900 !important; } /* = jami */
 
     /* ── Grand total ── */
