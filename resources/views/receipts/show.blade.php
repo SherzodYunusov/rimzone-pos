@@ -100,19 +100,18 @@
     .total-label { font-size: 12px; font-weight: 700 !important; }
     .total-value { font-size: 13px; font-weight: 900 !important; }
 
-    /* Grand total — alohida ajralib tursin */
+    /* Grand total — termal printer uchun qora matn oq fonda */
     .grand-block {
-        background: #000;
-        color: #fff;
-        padding: 2.5mm 3mm;
+        border: 3px solid #000;
+        padding: 3mm;
         margin: 2mm 0;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        background: #fff;
     }
-    .grand-block * { color: #fff !important; }
-    .grand-label { font-size: 13px; font-weight: 900 !important; }
-    .grand-value { font-size: 17px; font-weight: 900 !important; }
+    .grand-label { font-size: 14px; font-weight: 900 !important; color: #000; }
+    .grand-value { font-size: 22px; font-weight: 900 !important; color: #000; }
 
     /* Badge */
     .badge {
@@ -182,6 +181,7 @@
     </table>
 
     {{-- GRAND TOTAL --}}
+    <hr class="divider-solid">
     <div class="grand-block">
         <span class="grand-label">JAMI SUMMA:</span>
         <span class="grand-value">{{ number_format($sale->total_price, 0, '.', ' ') }} SO'M</span>
