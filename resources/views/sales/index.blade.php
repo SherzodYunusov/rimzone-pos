@@ -160,15 +160,15 @@
                     <template x-for="(product, idx) in filteredProducts" :key="product.id">
                         <div class="product-card animate-fade-up rounded-xl p-3 md:p-4 flex flex-col gap-2 md:gap-3 cursor-pointer"
                              :style="`animation-delay: ${idx * 0.03}s`">
-                            <!-- Name & stock badge -->
-                            <div class="flex items-start justify-between gap-1.5">
-                                <div class="flex-1 min-w-0">
-                                    <p class="text-xs md:text-sm font-bold text-slate-800 leading-tight line-clamp-2" x-text="product.name"></p>
-                                    <p class="text-[11px] md:text-xs text-blue-600 font-semibold mt-0.5" x-text="formatMoney(product.price) + ' so\'m / ' + (product.unit || 'dona')"></p>
+                            <!-- Name & stock -->
+                            <div class="flex flex-col gap-1">
+                                <p class="text-xs md:text-sm font-bold text-slate-800 leading-tight line-clamp-2" x-text="product.name"></p>
+                                <div class="flex items-center justify-between gap-1">
+                                    <p class="text-xs md:text-sm text-blue-600 font-semibold" x-text="formatMoney(product.price) + ' so\'m'"></p>
+                                    <span class="text-xs font-bold px-2 py-0.5 rounded-lg border transition-all stock-badge"
+                                          :class="parseFloat(product.quantity) <= 0 ? 'bg-red-50 text-red-600 border-red-300' : parseFloat(product.quantity) <= 5 ? 'low bg-amber-50 text-amber-700 border-amber-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                                          x-text="parseFloat(product.quantity) + ' ' + (product.unit || 'dona')"></span>
                                 </div>
-                                <span class="shrink-0 text-[10px] md:text-[11px] font-bold px-1.5 py-0.5 rounded-md border transition-all stock-badge"
-                                      :class="parseFloat(product.quantity) <= 5 ? 'low bg-red-50 text-red-700 border-red-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
-                                      x-text="parseFloat(product.quantity) + ' ' + (product.unit || 'dona')"></span>
                             </div>
 
                             <!-- Counter -->
