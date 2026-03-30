@@ -164,7 +164,7 @@
                             <div class="flex items-start justify-between gap-1.5">
                                 <div class="flex-1 min-w-0">
                                     <p class="text-xs md:text-sm font-bold text-slate-800 leading-tight line-clamp-2" x-text="product.name"></p>
-                                    <p class="text-[11px] md:text-xs text-blue-600 font-semibold mt-0.5" x-text="formatMoney(product.price) + ' so\'m'"></p>
+                                    <p class="text-[11px] md:text-xs text-blue-600 font-semibold mt-0.5" x-text="formatMoney(product.price) + ' so\'m / ' + (product.unit || 'dona')"></p>
                                 </div>
                                 <span class="shrink-0 text-[10px] md:text-[11px] font-bold px-1.5 py-0.5 rounded-md border transition-all stock-badge"
                                       :class="parseFloat(product.quantity) <= 5 ? 'low bg-red-50 text-red-700 border-red-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"

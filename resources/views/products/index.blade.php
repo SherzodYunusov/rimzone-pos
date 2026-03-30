@@ -109,7 +109,7 @@
                     </div>
                     <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
                         <p class="text-xs text-slate-500 font-medium mb-1">Qoldiq</p>
-                        <p class="text-lg font-bold text-slate-800" x-text="(products.find(p => p.id === selectedProductId)?.quantity || 0) + ' dona'"></p>
+                        <p class="text-lg font-bold text-slate-800" x-text="(products.find(p => p.id === selectedProductId)?.quantity || 0) + ' ' + (products.find(p => p.id === selectedProductId)?.unit || 'dona')"></p>
                     </div>
                     <div class="bg-slate-50 rounded-lg p-4 border border-slate-200">
                         <p class="text-xs text-slate-500 font-medium mb-1">Jami summa</p>
@@ -145,7 +145,8 @@
                     <div class="px-3 md:px-4 pb-2 md:pb-3 flex-1 space-y-1.5 md:space-y-2">
                         <div class="flex items-center justify-between">
                             <span class="text-[10px] md:text-xs text-slate-400">Narxi</span>
-                            <span class="text-[11px] md:text-sm font-semibold text-slate-700" x-text="parseFloat(product.price).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m'"></span>
+                            <span class="text-[11px] md:text-sm font-semibold text-slate-700"
+                                  x-text="parseFloat(product.price).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m / ' + (product.unit || 'dona')"></span>
                         </div>
                         <template x-if="product.cost_price && parseFloat(product.cost_price) > 0">
                             <div class="flex items-center justify-between">
@@ -155,7 +156,7 @@
                         </template>
                         <div class="flex items-center justify-between">
                             <span class="text-[10px] md:text-xs text-slate-400">Qoldiq</span>
-                            <div class="flex items-center gap-1">
+                            <div class="flex flex-col items-end gap-0.5">
                                 <span class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] md:text-xs font-semibold border"
                                       :class="parseFloat(product.quantity) === 0
                                         ? 'bg-red-50 text-red-700 border-red-200'
@@ -163,6 +164,10 @@
                                           ? 'bg-amber-50 text-amber-700 border-amber-200'
                                           : 'bg-blue-50 text-blue-700 border-blue-100'"
                                       x-text="parseFloat(product.quantity) + ' ' + (product.unit || 'dona')"></span>
+                                <template x-if="product.unit_value && parseFloat(product.unit_value) > 0 && product.unit !== 'dona'">
+                                    <span class="text-[9px] md:text-[10px] text-slate-400"
+                                          x-text="'1 ta = ' + parseFloat(product.unit_value) + ' ' + product.unit"></span>
+                                </template>
                             </div>
                         </div>
                         <template x-if="product.description">
@@ -177,7 +182,7 @@
                     </div>
 
                     <!-- Actions -->
-                    <div class="border-t flex" :class="parseInt(product.quantity) === 0 ? 'border-red-100' : 'border-slate-100'">
+                    <div class="border-t flex" :class="parseFloat(product.quantity) === 0 ? 'border-red-100' : 'border-slate-100'">
                         <button @click="editProduct(product)"
                             class="flex-1 flex items-center justify-center gap-1 md:gap-1.5 py-2.5 md:py-3 text-[11px] md:text-xs font-medium transition-colors border-r active:scale-95"
                             :class="parseFloat(product.quantity) === 0
@@ -230,7 +235,7 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0">
         <div @click.outside="closeModal()" @click.stop
-             class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden"
+             class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden"
              x-transition:enter="transition ease-out duration-300"
              x-transition:enter-start="opacity-0 scale-90 translate-y-4"
              x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -249,69 +254,84 @@
             </div>
 
             <!-- Body -->
-            <div class="p-4 sm:p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            <div class="p-4 sm:p-6 space-y-4 max-h-[75dvh] overflow-y-auto">
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1.5">Mahsulot nomi <span class="text-red-500">*</span></label>
                     <input type="text" x-model="form.name" placeholder="Masalan: Shampun..."
-                        class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400">
+                        class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400">
                     <p x-show="errors.name" class="text-red-500 text-xs mt-1" x-text="errors.name"></p>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1.5">Sotish narxi (so'm) <span class="text-red-500">*</span></label>
-                        <input type="number" step="0.01" x-model="form.price" placeholder="0"
-                            class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
+                        <input type="number" step="0.01" inputmode="decimal" x-model="form.price" placeholder="0"
+                            class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
                         <p x-show="errors.price" class="text-red-500 text-xs mt-1" x-text="errors.price"></p>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1.5">Tannarx (so'm) <span class="text-slate-400">(ixtiyoriy)</span></label>
-                        <input type="number" step="0.01" x-model="form.cost_price" placeholder="0"
-                            class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
+                        <input type="number" step="0.01" inputmode="decimal" x-model="form.cost_price" placeholder="0"
+                            class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
                     </div>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <!-- O'lchov birligi -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1.5">O'lchov birligi <span class="text-red-500">*</span></label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" @click="form.unit = 'dona'; form.unit_value = ''"
+                            :class="form.unit === 'dona' ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'"
+                            class="py-3 text-sm font-bold border rounded-xl transition-all">Dona</button>
+                        <button type="button" @click="form.unit = 'kg'"
+                            :class="form.unit === 'kg' ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'"
+                            class="py-3 text-sm font-bold border rounded-xl transition-all">Kg</button>
+                        <button type="button" @click="form.unit = 'litr'"
+                            :class="form.unit === 'litr' ? 'bg-blue-600 text-white border-blue-600 shadow-sm' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'"
+                            class="py-3 text-sm font-bold border rounded-xl transition-all">Litr</button>
+                    </div>
+                    <p x-show="errors.unit" class="text-red-500 text-xs mt-1" x-text="errors.unit"></p>
+                </div>
+
+                <!-- Soni (dona uchun) -->
+                <div x-show="form.unit === 'dona'">
+                    <label class="block text-xs font-medium text-slate-600 mb-1.5">Ombordagi soni (dona) <span class="text-red-500">*</span></label>
+                    <input type="number" step="1" inputmode="numeric" x-model="form.quantity" placeholder="0"
+                        class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
+                    <p x-show="errors.quantity" class="text-red-500 text-xs mt-1" x-text="errors.quantity"></p>
+                </div>
+
+                <!-- Soni + unit_value (kg/litr uchun) -->
+                <div x-show="form.unit === 'kg' || form.unit === 'litr'" class="grid grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1.5">O'lchov birligi <span class="text-red-500">*</span></label>
-                        <div class="grid grid-cols-3 gap-1.5">
-                            <button type="button" @click="form.unit = 'dona'"
-                                :class="form.unit === 'dona' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'"
-                                class="py-2 text-xs font-bold border rounded-lg transition-all">Dona</button>
-                            <button type="button" @click="form.unit = 'kg'"
-                                :class="form.unit === 'kg' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'"
-                                class="py-2 text-xs font-bold border rounded-lg transition-all">Kg</button>
-                            <button type="button" @click="form.unit = 'litr'"
-                                :class="form.unit === 'litr' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-600 border-slate-200 hover:border-blue-300'"
-                                class="py-2 text-xs font-bold border rounded-lg transition-all">Litr</button>
-                        </div>
-                        <p x-show="errors.unit" class="text-red-500 text-xs mt-1" x-text="errors.unit"></p>
+                        <label class="block text-xs font-medium text-slate-600 mb-1.5">
+                            Ombordagi miqdor (<span x-text="form.unit"></span>) <span class="text-red-500">*</span>
+                        </label>
+                        <input type="number" step="0.001" inputmode="decimal" x-model="form.quantity" placeholder="0"
+                            class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
+                        <p x-show="errors.quantity" class="text-red-500 text-xs mt-1" x-text="errors.quantity"></p>
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-slate-600 mb-1.5">
-                            Soni (<span x-text="form.unit || 'dona'"></span>) <span class="text-red-500">*</span>
+                            1 donasi necha <span x-text="form.unit"></span> <span class="text-slate-400">(ixtiyoriy)</span>
                         </label>
-                        <input type="number"
-                            :step="form.unit === 'kg' || form.unit === 'litr' ? '0.001' : '1'"
-                            :inputmode="form.unit === 'kg' || form.unit === 'litr' ? 'decimal' : 'numeric'"
-                            x-model="form.quantity" placeholder="0"
-                            class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
-                        <p x-show="errors.quantity" class="text-red-500 text-xs mt-1" x-text="errors.quantity"></p>
+                        <input type="number" step="0.001" inputmode="decimal" x-model="form.unit_value" placeholder="0"
+                            class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
                     </div>
                 </div>
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1.5">Tavsif <span class="text-slate-400">(ixtiyoriy)</span></label>
                     <textarea x-model="form.description" placeholder="Mahsulot haqida qisqacha..."
-                        class="w-full px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400 resize-none h-20"></textarea>
+                        class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400 resize-none h-20"></textarea>
                 </div>
             </div>
 
             <!-- Footer -->
             <div class="flex gap-3 px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-xl">
                 <button @click="closeModal()"
-                    class="flex-1 px-4 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors">
+                    class="flex-1 px-4 py-3 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors">
                     Bekor qilish
                 </button>
                 <button @click="submitForm()"
-                    class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm">
+                    class="flex-1 px-4 py-3 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-xl transition-colors shadow-sm">
                     Saqlash
                 </button>
             </div>
@@ -357,7 +377,7 @@ function productApp() {
         editingId: null,
         selectedProductId: null,
         searchTerm: '',
-        form: { name: '', price: '', cost_price: '', quantity: '', unit: 'dona', description: '' },
+        form: { name: '', price: '', cost_price: '', quantity: '', unit: 'dona', unit_value: '', description: '' },
         errors: {},
         filterType: 'all',
 
@@ -374,7 +394,7 @@ function productApp() {
 
         openNewModal() {
             this.editingId = null;
-            this.form = { name: '', price: '', cost_price: '', quantity: '', unit: 'dona', description: '' };
+            this.form = { name: '', price: '', cost_price: '', quantity: '', unit: 'dona', unit_value: '', description: '' };
             this.errors = {};
             this.isModalOpen = true;
         },
@@ -387,6 +407,7 @@ function productApp() {
                 cost_price: product.cost_price || '',
                 quantity: product.quantity,
                 unit: product.unit || 'dona',
+                unit_value: product.unit_value || '',
                 description: product.description || ''
             };
             this.errors = {};
@@ -397,7 +418,7 @@ function productApp() {
             this.isModalOpen = false;
             setTimeout(() => {
                 this.editingId = null;
-                this.form = { name: '', price: '', cost_price: '', quantity: '', unit: 'dona', description: '' };
+                this.form = { name: '', price: '', cost_price: '', quantity: '', unit: 'dona', unit_value: '', description: '' };
                 this.errors = {};
             }, 200);
         },
@@ -478,7 +499,7 @@ function productApp() {
         calculateTotal(id) {
             const p = this.products.find(p => p.id === id);
             if (!p) return '—';
-            return (parseInt(p.quantity) * parseFloat(p.price)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m';
+            return (parseFloat(p.quantity) * parseFloat(p.price)).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m';
         },
 
         formatDate(dateStr) {
