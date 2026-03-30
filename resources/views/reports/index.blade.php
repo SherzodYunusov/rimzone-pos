@@ -753,10 +753,18 @@
                                 <td class="px-5 py-2.5 text-right text-sm font-black text-emerald-600">{{ number_format($item->unit_price * $item->quantity,0,',',' ') }}</td>
                                 <td class="px-5 py-2.5 text-right align-top">
                                     @if($idx === 0)
-                                    <button @click="confirmDelete({{ $sale->id }})"
-                                        class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 bg-white border border-slate-200 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all mt-0.5">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </button>
+                                    <div class="flex flex-col gap-1">
+                                        <button onclick="printSaleReceipt({{ $sale->id }})"
+                                            title="Chek chiqarish"
+                                            class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 bg-white border border-slate-200 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-all">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        </button>
+                                        <button @click="confirmDelete({{ $sale->id }})"
+                                            title="O'chirish"
+                                            class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 bg-white border border-slate-200 hover:text-red-600 hover:bg-red-50 hover:border-red-200 transition-all">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                        </button>
+                                    </div>
                                     @endif
                                 </td>
                             </tr>
@@ -1076,5 +1084,20 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
+
+function printSaleReceipt(saleId) {
+    const old = document.getElementById('report-receipt-iframe');
+    if (old) old.remove();
+    const iframe = document.createElement('iframe');
+    iframe.id = 'report-receipt-iframe';
+    iframe.style.cssText = 'position:fixed;top:-9999px;left:-9999px;width:0;height:0;border:none;';
+    iframe.src = '/receipts/' + saleId;
+    document.body.appendChild(iframe);
+    iframe.onload = () => {
+        try { iframe.contentWindow.focus(); iframe.contentWindow.print(); }
+        catch(e) { window.open('/receipts/' + saleId, '_blank'); }
+        setTimeout(() => { iframe.remove(); }, 3000);
+    };
+}
 </script>
 @endsection

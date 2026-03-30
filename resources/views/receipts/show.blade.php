@@ -143,8 +143,14 @@
         <div class="item-name">{{ $item->product ? $item->product->name : '— o\'chirilgan —' }}</div>
         {{-- 2-qator: son × narx = jami --}}
         <div class="item-calc">
+            @php
+                $unit = $item->product?->unit ?? 'dona';
+                $qty  = ($unit === 'dona')
+                    ? (int) $item->quantity
+                    : rtrim(rtrim(number_format($item->quantity, 3, '.', ''), '0'), '.');
+            @endphp
             <span class="item-formula">
-                {{ $item->quantity }} x {{ number_format($item->unit_price, 0, '.', ' ') }} so'm
+                {{ $qty }} {{ $unit }} x {{ number_format($item->unit_price, 0, '.', ' ') }} so'm
             </span>
             <span class="item-total">= {{ number_format($item->unit_price * $item->quantity, 0, '.', ' ') }} so'm</span>
         </div>

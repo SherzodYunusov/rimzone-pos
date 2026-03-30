@@ -34,7 +34,7 @@ class SaleController extends Controller
             'due_date'           => 'nullable|date',
             'items'              => 'required|array|min:1',
             'items.*.product_id' => 'required|exists:products,id',
-            'items.*.quantity'   => 'required|integer|min:1',
+            'items.*.quantity'   => 'required|numeric|min:0.001',
         ]);
 
         // Nasiya uchun mijoz tanlash majburiy
@@ -62,7 +62,7 @@ class SaleController extends Controller
 
                     $lines[] = [
                         'product'    => $product,
-                        'quantity'   => (int) $item['quantity'],
+                        'quantity'   => (float) $item['quantity'],
                         'unit_price' => (float) $product->price,
                         'cost_price' => $product->cost_price ? (float) $product->cost_price : null,
                     ];

@@ -25,9 +25,8 @@ class ProductController extends Controller
             'name'        => 'required|string|max:255',
             'price'       => 'required|numeric|min:0',
             'cost_price'  => 'nullable|numeric|min:0',
-            'quantity'    => 'required|integer|min:0',
-            'unit_type'   => 'nullable|in:kg,litr',
-            'unit_value'  => 'nullable|numeric|min:0',
+            'quantity'    => 'required|numeric|min:0',
+            'unit'        => 'required|in:dona,kg,litr',
             'description' => 'nullable|string',
         ]);
 
@@ -59,9 +58,8 @@ class ProductController extends Controller
             'name'        => 'required|string|max:255',
             'price'       => 'required|numeric|min:0',
             'cost_price'  => 'nullable|numeric|min:0',
-            'quantity'    => 'required|integer|min:0',
-            'unit_type'   => 'nullable|in:kg,litr',
-            'unit_value'  => 'nullable|numeric|min:0',
+            'quantity'    => 'required|numeric|min:0',
+            'unit'        => 'required|in:dona,kg,litr',
             'description' => 'nullable|string',
         ]);
 

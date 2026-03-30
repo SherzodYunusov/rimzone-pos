@@ -74,10 +74,17 @@
 
     /* ── Mobile: cart becomes a slide-up bottom sheet ────────── */
     @media (max-width: 767px) {
+        /* Product panel takes full width on mobile */
+        .pos-left {
+            width: 100% !important;
+            max-width: 100% !important;
+        }
+        /* Cart becomes a fixed bottom sheet */
         .pos-right {
             position: fixed !important;
             left: 0; right: 0; bottom: 0;
             width: 100% !important;
+            max-width: 100% !important;
             height: 90dvh !important;
             z-index: 200;
             border-radius: 1.25rem 1.25rem 0 0;
@@ -85,12 +92,16 @@
             transform: translateY(100%);
             transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             overflow: hidden;
+            display: flex !important;
+            flex-direction: column !important;
         }
         .pos-right.mobile-open {
             transform: translateY(0);
         }
         /* drag handle */
         .pos-drag-handle { display: block; }
+        /* prevent body scroll when cart is open */
+        body.cart-open { overflow: hidden; }
     }
     @media (min-width: 768px) {
         .pos-right { transform: none !important; }
@@ -156,8 +167,8 @@
                                     <p class="text-[11px] md:text-xs text-blue-600 font-semibold mt-0.5" x-text="formatMoney(product.price) + ' so\'m'"></p>
                                 </div>
                                 <span class="shrink-0 text-[10px] md:text-[11px] font-bold px-1.5 py-0.5 rounded-md border transition-all stock-badge"
-                                      :class="product.quantity <= 5 ? 'low bg-red-50 text-red-700 border-red-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
-                                      x-text="product.quantity + ' ta'"></span>
+                                      :class="parseFloat(product.quantity) <= 5 ? 'low bg-red-50 text-red-700 border-red-300' : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                                      x-text="parseFloat(product.quantity) + ' ' + (product.unit || 'dona')"></span>
                             </div>
 
                             <!-- Counter -->
@@ -170,7 +181,8 @@
                                     </button>
                                     <input
                                         type="number"
-                                        inputmode="numeric"
+                                        :inputmode="(product.unit === 'kg' || product.unit === 'litr') ? 'decimal' : 'numeric'"
+                                        :step="(product.unit === 'kg' || product.unit === 'litr') ? '0.1' : '1'"
                                         min="0"
                                         :max="product.quantity"
                                         :value="cartQty(product.id) || ''"
@@ -260,7 +272,7 @@
                             <div class="flex items-start gap-2 justify-between">
                                 <div class="flex-1 min-w-0">
                                     <p class="text-sm font-semibold text-slate-800 leading-tight truncate" x-text="item.name"></p>
-                                    <p class="text-xs text-slate-500 mt-0.5" x-text="formatMoney(item.price) + ' so\'m / dona'"></p>
+                                    <p class="text-xs text-slate-500 mt-0.5" x-text="formatMoney(item.price) + ' so\'m / ' + (item.unit || 'dona')"></p>
                                 </div>
                                 <div class="shrink-0 flex flex-col items-end gap-1.5">
                                     <p class="text-sm font-bold text-blue-700" x-text="formatMoney(item.price * item.qty) + ' so\'m'"></p>
@@ -272,8 +284,9 @@
                                         </button>
                                         <input
                                             type="number"
-                                            inputmode="numeric"
-                                            min="1"
+                                            :inputmode="(item.unit === 'kg' || item.unit === 'litr') ? 'decimal' : 'numeric'"
+                                            :step="(item.unit === 'kg' || item.unit === 'litr') ? '0.1' : '1'"
+                                            :min="(item.unit === 'kg' || item.unit === 'litr') ? '0.001' : '1'"
                                             :value="item.qty"
                                             @input="debouncedSetQtyById(item.id, $event.target.value)"
                                             @focus="$event.target.select()"
@@ -703,6 +716,12 @@ function posApp() {
         pulseCart: false,
         showCartMobile: false,
         showPrintModal: false,
+
+        init() {
+            this.$watch('showCartMobile', val => {
+                document.body.classList.toggle('cart-open', val);
+            });
+        },
         pendingSaleId: null,
         printLoading: false,
 
@@ -724,8 +743,8 @@ function posApp() {
                 ? this.products.filter(p => p.name.toLowerCase().includes(s)) 
                 : this.products;
         },
-        get cartCount() { return this.cart.reduce((sum, i) => sum + i.qty, 0); },
-        get cartTotal() { return this.cart.reduce((sum, i) => sum + i.price * i.qty, 0); },
+        get cartCount() { return this.cart.reduce((sum, i) => sum + parseFloat(i.qty), 0); },
+        get cartTotal() { return this.cart.reduce((sum, i) => sum + parseFloat(i.price) * parseFloat(i.qty), 0); },
 
         /* ─── Cart Methods ──────────────────────────────────────── */
         cartQty(pid) { return this.cart.find(i => i.id === pid)?.qty ?? 0; },
@@ -742,14 +761,16 @@ function posApp() {
                 return;
             }
             const existing = this.cart.find(i => i.id === product.id);
+            const step = (product.unit === 'kg' || product.unit === 'litr') ? 0.1 : 1;
             if (existing) {
-                existing.qty++;
+                existing.qty = parseFloat((existing.qty + step).toFixed(3));
             } else {
                 this.cart.push({
                     id: product.id,
                     name: product.name,
                     price: parseFloat(product.price),
-                    qty: 1
+                    unit: product.unit || 'dona',
+                    qty: step
                 });
             }
             this.triggerPulse();
@@ -760,10 +781,12 @@ function posApp() {
         decrement(pid) {
             const idx = this.cart.findIndex(i => i.id === pid);
             if (idx === -1) return;
-            if (this.cart[idx].qty <= 1) {
+            const step = (this.cart[idx].unit === 'kg' || this.cart[idx].unit === 'litr') ? 0.1 : 1;
+            const newQty = parseFloat((this.cart[idx].qty - step).toFixed(3));
+            if (newQty <= 0) {
                 this.cart.splice(idx, 1);
             } else {
-                this.cart[idx].qty--;
+                this.cart[idx].qty = newQty;
                 this.triggerFlash(pid);
             }
             this.triggerTotalFlash();
@@ -771,29 +794,33 @@ function posApp() {
 
         // To'g'ridan-to'g'ri miqdor kiritish (mahsulot grid)
         setQty(product, value) {
-            const v = parseInt(value);
+            const v = parseFloat(value);
             if (isNaN(v) || v <= 0) { this.removeFromCart(product.id); return; }
-            const capped = Math.min(v, product.quantity);
+            const capped = Math.min(v, parseFloat(product.quantity));
             if (capped <= 0) { this.showNotif(`${product.name}: omborda mahsulot qolmagan!`, 'error'); return; }
-            if (capped < v) this.showNotif(`${product.name}: omborda faqat ${product.quantity} dona mavjud!`, 'error');
+            if (capped < v) this.showNotif(`${product.name}: omborda faqat ${product.quantity} ${product.unit || 'dona'} mavjud!`, 'error');
             const existing = this.cart.find(i => i.id === product.id);
-            if (existing) { existing.qty = capped; }
-            else { this.cart.push({ id: product.id, name: product.name, price: parseFloat(product.price), qty: capped }); }
+            if (existing) { existing.qty = parseFloat(capped.toFixed(3)); }
+            else { this.cart.push({ id: product.id, name: product.name, price: parseFloat(product.price), unit: product.unit || 'dona', qty: parseFloat(capped.toFixed(3)) }); }
         },
 
         // Savatchadagi item uchun miqdor kiritish (ID bo'yicha)
         setQtyById(pid, value) {
-            const v = parseInt(value);
+            const v = parseFloat(value);
             const idx = this.cart.findIndex(i => i.id === pid);
             if (idx === -1) return;
             if (isNaN(v) || v <= 0) { this.cart.splice(idx, 1); return; }
-            this.cart[idx].qty = v;
+            this.cart[idx].qty = parseFloat(v.toFixed(3));
         },
 
-        // Savatchadagi item uchun +1 (ID bo'yicha)
+        // Savatchadagi item uchun +step (ID bo'yicha)
         incrementById(pid) {
             const idx = this.cart.findIndex(i => i.id === pid);
-            if (idx !== -1) { this.cart[idx].qty++; this.triggerFlash(pid); }
+            if (idx !== -1) {
+                const step = (this.cart[idx].unit === 'kg' || this.cart[idx].unit === 'litr') ? 0.1 : 1;
+                this.cart[idx].qty = parseFloat((this.cart[idx].qty + step).toFixed(3));
+                this.triggerFlash(pid);
+            }
         },
 
         // Debounced version for @input on product grid qty field
