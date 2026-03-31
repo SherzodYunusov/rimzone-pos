@@ -409,7 +409,7 @@
 
     <!-- ── MOBILE: FAB cart button ─────────────────────────────── -->
     <div class="pos-cart-fab md:hidden fixed z-[200]"
-         style="right:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); display:none;"
+         style="right:16px; bottom:calc(80px + env(safe-area-inset-bottom, 0px)); display:none;"
          x-show="cart.length > 0 && !showCartMobile"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 scale-75 translate-y-4"
