@@ -111,16 +111,27 @@
         .pos-drag-handle { display: block; }
         /* prevent body scroll when cart is open */
         body.cart-open { overflow: hidden; }
-        /* Sidebar stays on top of everything when open */
+        /* Z-index stack (mobile):
+           sidebar backdrop  z-40  (layout)
+           sidebar           z-600
+           float cart btn    z-200
+           cart backdrop     z-240
+           cart sheet        z-250
+           checkout modal    z-400
+           history modal     z-400
+           print modal       z-500
+           notifications     z-9999
+        */
         aside { z-index: 600 !important; }
-        /* All action modals must be above cart (z-250) */
-        .modal-above-cart { z-index: 500 !important; }
+        .modal-above-cart { z-index: 400 !important; }
     }
     @media (min-width: 768px) {
         .pos-right { transform: none !important; }
         .pos-drag-handle { display: none; }
-        .pos-mobile-bar { display: none !important; }
+        .pos-mobile-bar { display: none !important; visibility: hidden !important; }
     }
+    /* Alpine x-show uses display:none — ensure no conflict */
+    .pos-mobile-bar[style*="display: none"] { display: none !important; }
 </style>
 @endsection
 
@@ -143,7 +154,7 @@
                 <span class="hidden md:inline">Hisobot</span>
             </button>
             {{-- Mobile: open sidebar for navigation --}}
-            <button @click="$root.sidebarOpen = true"
+            <button @click="document.body.__x.$data.sidebarOpen = true"
                class="md:hidden p-2.5 bg-white hover:bg-slate-50 text-slate-500 active:scale-95 rounded-xl border border-slate-200 shadow-sm transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
@@ -393,7 +404,7 @@
 
     <!-- ── MOBILE: Floating cart button (only shown when cart has items) ── -->
     <div class="pos-mobile-bar fixed left-0 right-0 z-[200] md:hidden"
-         style="bottom: env(safe-area-inset-bottom, 0px); padding: 0 12px 12px 12px;"
+         style="bottom: env(safe-area-inset-bottom, 0px); padding: 0 12px 12px 12px; display:none;"
          x-show="cart.length > 0 && !showCartMobile"
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 translate-y-6 scale-95"
@@ -430,7 +441,7 @@
 
     <!-- ── HISTORY/REPORT MODAL ────────────────────────────────── -->
     <div x-show="isHistoryOpen" style="display:none" x-cloak
-         class="modal-above-cart fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/60 modal-overlay"
+         class="modal-above-cart fixed inset-0 z-[400] flex items-center justify-center p-3 bg-slate-900/70 modal-overlay"
          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
          
@@ -518,7 +529,7 @@
 
     <!-- ── CHECKOUT MODAL ──────────────────────────────────────── -->
     <div x-show="isSellOpen" style="display:none" x-cloak
-         class="modal-above-cart fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/60 modal-overlay"
+         class="modal-above-cart fixed inset-0 z-[400] flex items-center justify-center p-3 bg-slate-900/70 modal-overlay"
          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
          
@@ -669,7 +680,7 @@
 
     <!-- ── PRINT MODAL ─────────────────────────────────────────── -->
     <div x-show="showPrintModal" x-cloak style="display:none"
-         class="fixed inset-0 z-[700] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
+         class="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
