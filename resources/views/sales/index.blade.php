@@ -88,9 +88,9 @@
             max-width: 100% !important;
         }
 
-        /* Pastdagi savatcha paneli uchun joy */
+        /* Savatcha bar uchun joy: 60px (nav bar) + 72px (bar height) + 16px extra */
         .pos-product-grid {
-            padding-bottom: calc(84px + env(safe-area-inset-bottom, 16px)) !important;
+            padding-bottom: calc(148px + env(safe-area-inset-bottom, 0px)) !important;
         }
 
         /* Cart — slide-up bottom sheet */
@@ -263,8 +263,8 @@
                                     </button>
                                     <input
                                         type="number"
-                                        :inputmode="(product.unit === 'kg' || product.unit === 'litr') ? 'decimal' : 'numeric'"
-                                        :step="(product.unit === 'kg' || product.unit === 'litr') ? '0.1' : '1'"
+                                        inputmode="numeric"
+                                        step="1"
                                         min="0"
                                         :max="product.quantity"
                                         :value="cartQty(product.id) || ''"
@@ -368,9 +368,9 @@
                                         </button>
                                         <input
                                             type="number"
-                                            :inputmode="(item.unit === 'kg' || item.unit === 'litr') ? 'decimal' : 'numeric'"
-                                            :step="(item.unit === 'kg' || item.unit === 'litr') ? '0.1' : '1'"
-                                            :min="(item.unit === 'kg' || item.unit === 'litr') ? '0.001' : '1'"
+                                            inputmode="numeric"
+                                            step="1"
+                                            min="1"
                                             :value="item.qty"
                                             @input="debouncedSetQtyById(item.id, $event.target.value)"
                                             @focus="$event.target.select()"
@@ -456,14 +456,15 @@
 
     <!-- ── MOBILE: Savatcha bottom bar — faqat cart.length > 0 da ko'rinadi ── -->
     <div class="md:hidden fixed left-0 right-0 z-[200]"
-         style="bottom:0; padding-bottom: env(safe-area-inset-bottom, 8px); display:none;"
+         style="bottom: calc(60px + env(safe-area-inset-bottom, 0px));"
+         x-cloak
          x-show="cart.length > 0 && !showCartMobile"
          x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 translate-y-full"
+         x-transition:enter-start="opacity-0 translate-y-6"
          x-transition:enter-end="opacity-100 translate-y-0"
          x-transition:leave="transition ease-in duration-200"
          x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 translate-y-full">
+         x-transition:leave-end="opacity-0 translate-y-6">
         <div class="mx-3 mb-2">
             <button @click="showCartMobile = true"
                 class="w-full flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600 active:from-blue-700 active:to-indigo-700 active:scale-[0.98] text-white rounded-2xl shadow-2xl shadow-blue-500/40 transition-all duration-150 px-4 py-3">
@@ -842,20 +843,19 @@ function posApp() {
         increment(product) {
             const curr = this.cartQty(product.id);
             if (curr >= product.quantity) {
-                this.showNotif(`${product.name}: omborda faqat ${product.quantity} dona mavjud!`, 'error');
+                this.showNotif(`${product.name}: omborda faqat ${product.quantity} ta mavjud!`, 'error');
                 return;
             }
             const existing = this.cart.find(i => i.id === product.id);
-            const step = (product.unit === 'kg' || product.unit === 'litr') ? 0.1 : 1;
             if (existing) {
-                existing.qty = parseFloat((existing.qty + step).toFixed(3));
+                existing.qty += 1;
             } else {
                 this.cart.push({
                     id: product.id,
                     name: product.name,
                     price: parseFloat(product.price),
                     unit: product.unit || 'dona',
-                    qty: step
+                    qty: 1
                 });
             }
             this.triggerPulse();
@@ -866,8 +866,7 @@ function posApp() {
         decrement(pid) {
             const idx = this.cart.findIndex(i => i.id === pid);
             if (idx === -1) return;
-            const step = (this.cart[idx].unit === 'kg' || this.cart[idx].unit === 'litr') ? 0.1 : 1;
-            const newQty = parseFloat((this.cart[idx].qty - step).toFixed(3));
+            const newQty = this.cart[idx].qty - 1;
             if (newQty <= 0) {
                 this.cart.splice(idx, 1);
             } else {
@@ -899,8 +898,7 @@ function posApp() {
         incrementById(pid) {
             const idx = this.cart.findIndex(i => i.id === pid);
             if (idx !== -1) {
-                const step = (this.cart[idx].unit === 'kg' || this.cart[idx].unit === 'litr') ? 0.1 : 1;
-                this.cart[idx].qty = parseFloat((this.cart[idx].qty + step).toFixed(3));
+                this.cart[idx].qty += 1;
                 this.triggerFlash(pid);
             }
         },
