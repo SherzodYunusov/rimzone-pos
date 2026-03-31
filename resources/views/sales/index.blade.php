@@ -88,9 +88,9 @@
             max-width: 100% !important;
         }
 
-        /* Extra space at bottom: FAB height + browser nav + safe-area */
+        /* Pastdagi savatcha paneli uchun joy */
         .pos-product-grid {
-            padding-bottom: calc(96px + env(safe-area-inset-bottom, 20px)) !important;
+            padding-bottom: calc(84px + env(safe-area-inset-bottom, 16px)) !important;
         }
 
         /* Cart — slide-up bottom sheet */
@@ -131,11 +131,26 @@
         aside { z-index: 600 !important; }
     }
 
-    /* Desktop: cart always visible, no FAB */
+    /* Desktop: cart always visible */
     @media (min-width: 768px) {
-        .pos-right   { transform: none !important; }
+        .pos-right       { transform: none !important; }
         .pos-drag-handle { display: none; }
-        .pos-cart-fab { display: none !important; }
+    }
+
+    /* Product card rang — stock holatiga qarab */
+    .pcard-ok   { border-color: rgba(167,243,208,0.8); background: linear-gradient(145deg,#fff 60%,#f0fdf4 100%); }
+    .pcard-low  { border-color: rgba(252,211,77,0.7);  background: linear-gradient(145deg,#fff 60%,#fffbeb 100%); }
+    .pcard-out  { border-color: rgba(252,165,165,0.8); background: linear-gradient(145deg,#fff 60%,#fef2f2 100%); }
+    .pcard-ok:hover  { box-shadow: 0 12px 28px -6px rgba(16,185,129,0.15); border-color: rgba(52,211,153,0.8); }
+    .pcard-low:hover { box-shadow: 0 12px 28px -6px rgba(245,158,11,0.15); border-color: rgba(252,211,77,1); }
+    .pcard-out:hover { box-shadow: 0 12px 28px -6px rgba(239,68,68,0.15);  border-color: rgba(252,165,165,1); }
+
+    /* Narx rangi kartada */
+    .price-tag {
+        background: linear-gradient(90deg, #2563eb, #4f46e5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
     }
 </style>
 @endsection
@@ -144,24 +159,24 @@
 <div x-data="posApp()" x-cloak>
 
     <!-- ── TOP BAR ─────────────────────────────────────────────── -->
-    <div class="h-14 md:h-16 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200 flex items-center justify-between px-3 md:px-6 shrink-0 sticky top-0" style="z-index:350;">
+    <div class="h-14 md:h-16 bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 flex items-center justify-between px-3 md:px-6 shrink-0 sticky top-0 shadow-lg shadow-blue-500/30" style="z-index:350;">
         <!-- Chap: hamburger (mobile) + POS + counter -->
         <div class="flex items-center gap-2">
             <!-- Hamburger — LEFT side -->
             <button @click="$dispatch('open-sidebar')"
-               class="md:hidden p-2 bg-white text-slate-600 active:bg-slate-100 active:scale-95 rounded-xl border border-slate-200 shadow-sm transition-all">
+               class="md:hidden p-2 bg-white/20 hover:bg-white/30 text-white active:scale-95 rounded-xl transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
                 </svg>
             </button>
-            <h1 class="text-base md:text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">POS</h1>
-            <span class="px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200 transition-all duration-300 animate-pulse-soft"
-                  :class="pulseCart ? 'active bg-blue-100 ring-2 ring-blue-300 shadow-lg shadow-blue-200' : ''"
+            <h1 class="text-base md:text-lg font-black text-white tracking-wide">POS</h1>
+            <span class="px-2.5 py-1 bg-white/20 text-white text-xs font-bold rounded-full border border-white/30 transition-all duration-300 animate-pulse-soft"
+                  :class="pulseCart ? 'active bg-white/30 ring-2 ring-white/40 shadow-lg' : ''"
                   x-text="cartCount + ' ta'"></span>
         </div>
         <!-- O'ng: hisobot tugmasi -->
         <button type="button" @click="isHistoryOpen = true"
-            class="p-2 md:px-4 md:py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-all flex items-center gap-2 border border-slate-200 shadow-sm">
+            class="p-2 md:px-4 md:py-2 bg-white/20 hover:bg-white/30 text-white text-sm font-bold rounded-xl transition-all flex items-center gap-2 border border-white/20">
             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             <span class="hidden md:inline">Hisobot</span>
         </button>
@@ -171,10 +186,10 @@
     <div class="flex flex-1 overflow-hidden h-[calc(100dvh-3.5rem)] md:h-[calc(100dvh-4rem)]">
 
         <!-- LEFT: Product panel -->
-        <div class="flex-1 flex flex-col border-r border-slate-200 bg-gradient-to-b from-slate-50 to-slate-100 pos-left">
+        <div class="flex-1 flex flex-col border-r border-slate-200 bg-slate-50 pos-left">
 
             <!-- Search -->
-            <div class="p-4 bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+            <div class="p-3 bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
                 <div class="relative">
                     <svg class="w-4 h-4 text-blue-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
@@ -188,11 +203,15 @@
             <div class="pos-product-grid flex-1 overflow-y-auto p-3 md:p-4 pb-28 md:pb-4">
                 <div class="grid grid-cols-2 xl:grid-cols-3 gap-2 md:gap-3">
                     <template x-for="(product, idx) in filteredProducts" :key="product.id">
-                        <div class="product-card animate-fade-up rounded-xl flex flex-col gap-0 cursor-pointer overflow-hidden"
+                        <div class="product-card animate-fade-up rounded-xl flex flex-col gap-0 cursor-pointer overflow-hidden border"
                              :style="`animation-delay: ${idx * 0.03}s`"
-                             :class="parseFloat(product.quantity) <= 0 ? 'border border-red-200' : 'border border-slate-200'">
+                             :class="parseFloat(product.quantity) <= 0
+                                ? 'pcard-out'
+                                : parseFloat(product.quantity) <= 5
+                                  ? 'pcard-low'
+                                  : 'pcard-ok'">
 
-                            <!-- Nom + tugagan badge -->
+                            <!-- Nom + badge -->
                             <div class="px-3 pt-3 pb-2 flex items-start justify-between gap-1">
                                 <p class="text-xs md:text-sm font-bold text-slate-800 leading-snug line-clamp-2 flex-1"
                                    x-text="product.name"></p>
@@ -200,16 +219,16 @@
                                     <span class="shrink-0 text-[9px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded-full ml-1 whitespace-nowrap">Tugagan</span>
                                 </template>
                                 <template x-if="parseFloat(product.quantity) > 0 && parseFloat(product.quantity) <= 5">
-                                    <span class="shrink-0 text-[9px] font-bold bg-amber-100 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-full ml-1 whitespace-nowrap">Kam!</span>
+                                    <span class="shrink-0 text-[9px] font-bold bg-amber-400 text-white px-1.5 py-0.5 rounded-full ml-1 whitespace-nowrap">Kam!</span>
                                 </template>
                             </div>
 
                             <!-- Ma'lumotlar: narxi, soni, kg/litr — tannarx YO'Q -->
-                            <div class="px-3 pb-2 space-y-1 border-t border-slate-100 pt-2">
+                            <div class="px-3 pb-2 space-y-1 border-t border-white/60 pt-2">
                                 <!-- Narxi -->
                                 <div class="flex items-center justify-between">
                                     <span class="text-[10px] text-slate-400 font-medium">Narxi</span>
-                                    <span class="text-[11px] md:text-xs font-bold text-blue-600"
+                                    <span class="text-[11px] md:text-xs font-bold price-tag"
                                           x-text="formatMoney(product.price) + ' so\'m'"></span>
                                 </div>
                                 <!-- Soni -->
@@ -435,31 +454,42 @@
          @click="showCartMobile = false">
     </div>
 
-    <!-- ── MOBILE: FAB cart button — faqat cart.length > 0 da ko'rinadi ── -->
-    <div class="pos-cart-fab md:hidden fixed z-[200]"
-         style="right:16px; bottom:calc(80px + env(safe-area-inset-bottom, 0px)); display:none;"
+    <!-- ── MOBILE: Savatcha bottom bar — faqat cart.length > 0 da ko'rinadi ── -->
+    <div class="md:hidden fixed left-0 right-0 z-[200]"
+         style="bottom:0; padding-bottom: env(safe-area-inset-bottom, 8px); display:none;"
          x-show="cart.length > 0 && !showCartMobile"
          x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 scale-75 translate-y-4"
-         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+         x-transition:enter-start="opacity-0 translate-y-full"
+         x-transition:enter-end="opacity-100 translate-y-0"
          x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-         x-transition:leave-end="opacity-0 scale-75 translate-y-4">
-        <button @click="showCartMobile = true"
-            class="flex items-center gap-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-2xl shadow-blue-500/50 active:scale-95 active:shadow-none transition-all duration-150 px-5"
-            style="min-height:56px; min-width:56px;">
-            <div class="relative">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                </svg>
-                <span class="absolute -top-2 -right-2 bg-white text-blue-600 text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-md"
-                      x-text="cart.length"></span>
-            </div>
-            <div class="text-left">
-                <p class="text-[10px] text-blue-200 font-medium leading-none" x-text="cartCount + ' ta'"></p>
-                <p class="text-sm font-black leading-tight" x-text="formatMoney(cartTotal) + ' so\'m'"></p>
-            </div>
-        </button>
+         x-transition:leave-start="opacity-100 translate-y-0"
+         x-transition:leave-end="opacity-0 translate-y-full">
+        <div class="mx-3 mb-2">
+            <button @click="showCartMobile = true"
+                class="w-full flex items-center justify-between bg-gradient-to-r from-blue-600 to-indigo-600 active:from-blue-700 active:to-indigo-700 active:scale-[0.98] text-white rounded-2xl shadow-2xl shadow-blue-500/40 transition-all duration-150 px-4 py-3">
+                <!-- Chap: ikonka + nomi -->
+                <div class="flex items-center gap-2.5">
+                    <div class="relative">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                        </svg>
+                        <span class="absolute -top-2 -right-2 bg-white text-blue-600 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center"
+                              x-text="cart.length"></span>
+                    </div>
+                    <div>
+                        <p class="text-xs text-blue-200 font-medium leading-none">Savatcha</p>
+                        <p class="text-sm font-black leading-tight" x-text="cartCount + ' ta mahsulot'"></p>
+                    </div>
+                </div>
+                <!-- O'ng: jami summa + strelka -->
+                <div class="flex items-center gap-2">
+                    <p class="text-base font-black" x-text="formatMoney(cartTotal) + ' so\'m'"></p>
+                    <svg class="w-4 h-4 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/>
+                    </svg>
+                </div>
+            </button>
+        </div>
     </div>
 
     <!-- ── HISTORY/REPORT MODAL ────────────────────────────────── -->

@@ -494,6 +494,16 @@ function productApp() {
             if (!this.form.price)       { this.errors.price = 'Narxi kiritilishi shart'; return; }
             if (!this.form.quantity && this.form.quantity !== 0) { this.errors.quantity = 'Soni kiritilishi shart'; return; }
 
+            // Dublikat tekshiruvi — faqat yangi qo'shishda (tahrirlashda emas)
+            if (!this.editingId) {
+                const nomLower = this.form.name.trim().toLowerCase();
+                const duplicate = this.products.find(p => p.name.trim().toLowerCase() === nomLower);
+                if (duplicate) {
+                    this.errors.name = '⚠️ Bu mahsulot omborda allaqachon mavjud!';
+                    return;
+                }
+            }
+
             const url    = this.editingId ? `/products/${this.editingId}` : '/products';
             const method = this.editingId ? 'PUT' : 'POST';
 
