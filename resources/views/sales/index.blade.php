@@ -77,61 +77,66 @@
 
     [x-cloak] { display: none !important; }
 
-    /* ── Mobile: cart becomes a slide-up bottom sheet ────────── */
+    /* ═══════════════════════════════════════════════
+       MOBILE LAYOUT  (max-width: 767px)
+    ═══════════════════════════════════════════════ */
     @media (max-width: 767px) {
-        /* Product panel takes full width on mobile */
+
+        /* Product panel — full width */
         .pos-left {
             width: 100% !important;
             max-width: 100% !important;
         }
-        /* Extra bottom padding so content not hidden behind float bar + browser nav */
+
+        /* Extra space at bottom: FAB height + browser nav + safe-area */
         .pos-product-grid {
-            padding-bottom: calc(88px + env(safe-area-inset-bottom, 16px)) !important;
+            padding-bottom: calc(96px + env(safe-area-inset-bottom, 20px)) !important;
         }
-        /* Cart becomes a fixed bottom sheet */
+
+        /* Cart — slide-up bottom sheet */
         .pos-right {
             position: fixed !important;
             left: 0; right: 0; bottom: 0;
             width: 100% !important;
             max-width: 100% !important;
-            height: 92dvh !important;
-            z-index: 250;
-            border-radius: 1.25rem 1.25rem 0 0;
-            box-shadow: 0 -8px 40px rgba(0,0,0,0.22);
+            height: 93dvh !important;
+            z-index: 300;
+            border-radius: 1.5rem 1.5rem 0 0;
+            box-shadow: 0 -12px 48px rgba(0,0,0,0.25);
             transform: translateY(100%);
-            transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: transform 0.38s cubic-bezier(0.16, 1, 0.3, 1);
             overflow: hidden;
             display: flex !important;
             flex-direction: column !important;
         }
-        .pos-right.mobile-open {
-            transform: translateY(0);
-        }
-        /* drag handle */
+        .pos-right.mobile-open { transform: translateY(0); }
+
+        /* Drag handle */
         .pos-drag-handle { display: block; }
-        /* prevent body scroll when cart is open */
+
+        /* Lock body scroll when cart open */
         body.cart-open { overflow: hidden; }
-        /* Z-index stack (mobile):
-           sidebar backdrop  z-40  (layout)
-           sidebar           z-600
-           float cart btn    z-200
-           cart backdrop     z-240
-           cart sheet        z-250
-           checkout modal    z-400
-           history modal     z-400
-           print modal       z-500
-           notifications     z-9999
-        */
+
+        /* ── Z-index stack ──────────────────────────
+           sidebar backdrop : z-40  (layout.blade)
+           FAB cart button  : z-200
+           cart backdrop    : z-290
+           cart sheet       : z-300
+           checkout modal   : z-400
+           history modal    : z-400
+           print modal      : z-500
+           sidebar          : z-600
+           notifications    : z-9999
+        ─────────────────────────────────────────── */
         aside { z-index: 600 !important; }
-        .modal-above-cart { z-index: 400 !important; }
     }
+
+    /* Desktop: cart always visible, no FAB */
     @media (min-width: 768px) {
-        .pos-right { transform: none !important; }
+        .pos-right   { transform: none !important; }
         .pos-drag-handle { display: none; }
-        .pos-mobile-bar { display: none !important; visibility: hidden !important; }
+        .pos-cart-fab { display: none !important; }
     }
-    /* Alpine x-show uses display:none — ensure no conflict */
-    .pos-mobile-bar[style*="display: none"] { display: none !important; }
 </style>
 @endsection
 
@@ -153,10 +158,11 @@
                 <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 <span class="hidden md:inline">Hisobot</span>
             </button>
-            {{-- Mobile: open sidebar for navigation --}}
-            <button @click="document.body.__x.$data.sidebarOpen = true"
-               class="md:hidden p-2.5 bg-white hover:bg-slate-50 text-slate-500 active:scale-95 rounded-xl border border-slate-200 shadow-sm transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            {{-- Mobile: open sidebar --}}
+            <button @click="$dispatch('open-sidebar')"
+               class="md:hidden p-2.5 bg-white text-slate-600 active:scale-95 rounded-xl border border-slate-200 shadow-sm transition-all"
+               style="z-index:350; position:relative;">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
         </div>
     </div>
@@ -396,45 +402,35 @@
 
     <!-- ── MOBILE: Cart backdrop ───────────────────────────────── -->
     <div x-show="showCartMobile" style="display:none"
-         class="md:hidden fixed inset-0 z-[240] bg-slate-900/50 backdrop-blur-sm"
+         class="md:hidden fixed inset-0 z-[290] bg-slate-900/50 backdrop-blur-sm"
          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
          @click="showCartMobile = false">
     </div>
 
-    <!-- ── MOBILE: Floating cart button (only shown when cart has items) ── -->
-    <div class="pos-mobile-bar fixed left-0 right-0 z-[200] md:hidden"
-         style="bottom: env(safe-area-inset-bottom, 0px); padding: 0 12px 12px 12px; display:none;"
+    <!-- ── MOBILE: FAB cart button ─────────────────────────────── -->
+    <div class="pos-cart-fab md:hidden fixed z-[200]"
+         style="right:16px; bottom:calc(16px + env(safe-area-inset-bottom, 0px)); display:none;"
          x-show="cart.length > 0 && !showCartMobile"
          x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 translate-y-6 scale-95"
-         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:enter-start="opacity-0 scale-75 translate-y-4"
+         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
          x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
-         x-transition:leave-end="opacity-0 translate-y-4 scale-95">
+         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+         x-transition:leave-end="opacity-0 scale-75 translate-y-4">
         <button @click="showCartMobile = true"
-            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 active:from-blue-700 active:to-indigo-700 text-white rounded-2xl shadow-2xl shadow-blue-500/40 active:shadow-none active:scale-[0.97] transition-all duration-150 overflow-hidden"
-            style="min-height: 58px;">
-            <div class="flex items-center justify-between px-5 py-3">
-                <div class="flex items-center gap-3">
-                    <div class="relative shrink-0">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                        </svg>
-                        <span class="absolute -top-2 -right-2 bg-white text-blue-600 text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow"
-                              x-text="cart.length"></span>
-                    </div>
-                    <div class="text-left">
-                        <p class="text-[11px] text-blue-200 font-semibold leading-tight" x-text="cartCount + ' ta mahsulot'"></p>
-                        <p class="text-lg font-black leading-tight" x-text="formatMoney(cartTotal) + ' so\'m'"></p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-1.5 bg-white/20 rounded-xl px-3 py-2">
-                    <span class="text-sm font-bold">Savatcha</span>
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/>
-                    </svg>
-                </div>
+            class="flex items-center gap-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full shadow-2xl shadow-blue-500/50 active:scale-95 active:shadow-none transition-all duration-150 px-5"
+            style="min-height:56px; min-width:56px;">
+            <div class="relative">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+                <span class="absolute -top-2 -right-2 bg-white text-blue-600 text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-md"
+                      x-text="cart.length"></span>
+            </div>
+            <div class="text-left">
+                <p class="text-[10px] text-blue-200 font-medium leading-none" x-text="cartCount + ' ta'"></p>
+                <p class="text-sm font-black leading-tight" x-text="formatMoney(cartTotal) + ' so\'m'"></p>
             </div>
         </button>
     </div>

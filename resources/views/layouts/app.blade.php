@@ -59,7 +59,7 @@
     </style>
     @yield('head')
 </head>
-<body class="bg-slate-50 min-h-screen flex text-slate-700" x-data="{ sidebarOpen: false }">
+<body class="bg-slate-50 min-h-screen flex text-slate-700" x-data="{ sidebarOpen: false }" @open-sidebar.window="sidebarOpen = true">
 
     <!-- Mobile backdrop -->
     <div x-show="sidebarOpen" x-cloak
