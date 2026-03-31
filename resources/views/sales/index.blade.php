@@ -144,27 +144,26 @@
 <div x-data="posApp()" x-cloak>
 
     <!-- ── TOP BAR ─────────────────────────────────────────────── -->
-    <div class="h-14 md:h-16 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200 flex items-center justify-between px-4 md:px-6 shrink-0 z-10 sticky top-0">
-        <div class="flex items-center gap-3">
+    <div class="h-14 md:h-16 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200 flex items-center justify-between px-3 md:px-6 shrink-0 sticky top-0" style="z-index:350;">
+        <!-- Chap: hamburger (mobile) + POS + counter -->
+        <div class="flex items-center gap-2">
+            <button @click="$dispatch('open-sidebar')"
+               class="md:hidden p-2 bg-white text-slate-600 active:bg-slate-100 active:scale-95 rounded-xl border border-slate-200 shadow-sm transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/>
+                </svg>
+            </button>
             <h1 class="text-base md:text-lg font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">POS</h1>
             <span class="px-2.5 py-1 bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 text-xs font-bold rounded-full border border-blue-200 transition-all duration-300 animate-pulse-soft"
                   :class="pulseCart ? 'active bg-blue-100 ring-2 ring-blue-300 shadow-lg shadow-blue-200' : ''"
                   x-text="cartCount + ' ta'"></span>
         </div>
-
-        <div class="flex items-center gap-2">
-            <button type="button" @click="isHistoryOpen = true"
-                class="p-2 md:px-4 md:py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-all flex items-center gap-2 border border-slate-200 shadow-sm">
-                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                <span class="hidden md:inline">Hisobot</span>
-            </button>
-            {{-- Mobile: open sidebar --}}
-            <button @click="$dispatch('open-sidebar')"
-               class="md:hidden p-2.5 bg-white text-slate-600 active:scale-95 rounded-xl border border-slate-200 shadow-sm transition-all"
-               style="z-index:350; position:relative;">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 6h16M4 12h16M4 18h16"/></svg>
-            </button>
-        </div>
+        <!-- O'ng: hisobot tugmasi -->
+        <button type="button" @click="isHistoryOpen = true"
+            class="p-2 md:px-4 md:py-2 bg-white hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition-all flex items-center gap-2 border border-slate-200 shadow-sm">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+            <span class="hidden md:inline">Hisobot</span>
+        </button>
     </div>
 
     <!-- ── POS VIEW ─────────────────────────────────────────────── -->
