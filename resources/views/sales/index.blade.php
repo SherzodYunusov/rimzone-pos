@@ -93,6 +93,16 @@
             padding-bottom: calc(148px + env(safe-area-inset-bottom, 0px)) !important;
         }
 
+        /* Savatcha yopiq bo'lganda butunlay yashirin */
+        .pos-right:not(.mobile-open) {
+            display: none !important;
+        }
+
+        /* Savatcha footer — brauzer nav bar ustida */
+        .cart-footer-mobile {
+            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 64px);
+        }
+
         /* Cart — slide-up bottom sheet */
         .pos-right {
             position: fixed !important;
@@ -389,7 +399,7 @@
             </div>
 
             <!-- Cart footer -->
-            <div class="border-t border-slate-200 p-5 space-y-4 bg-white">
+            <div class="border-t border-slate-200 p-5 space-y-4 bg-white cart-footer-mobile">
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-slate-600 font-medium">Mahsulotlar jami:</span>
