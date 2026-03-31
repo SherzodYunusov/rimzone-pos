@@ -100,7 +100,7 @@
 
         /* Savatcha footer — brauzer nav bar ustida */
         .cart-footer-mobile {
-            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 64px);
+            padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 96px);
         }
 
         /* Cart — slide-up bottom sheet */
