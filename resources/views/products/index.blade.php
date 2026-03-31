@@ -148,12 +148,11 @@
                             <span class="text-[11px] md:text-sm font-semibold text-slate-700"
                                   x-text="parseFloat(product.price).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m / ' + (product.unit || 'dona')"></span>
                         </div>
-                        <template x-if="product.cost_price && parseFloat(product.cost_price) > 0">
-                            <div class="flex items-center justify-between">
-                                <span class="text-[10px] md:text-xs text-slate-400">Tannarx</span>
-                                <span class="text-[10px] md:text-xs font-medium text-slate-500" x-text="parseFloat(product.cost_price).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m'"></span>
-                            </div>
-                        </template>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] md:text-xs text-slate-400">Tannarx</span>
+                            <span class="text-[10px] md:text-xs font-medium text-slate-500"
+                                  x-text="(product.cost_price && parseFloat(product.cost_price) > 0) ? parseFloat(product.cost_price).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' so\'m' : '—'"></span>
+                        </div>
                         <div class="flex items-center justify-between">
                             <span class="text-[10px] md:text-xs text-slate-400">Qoldiq</span>
                             <div class="flex flex-col items-end gap-0.5">
