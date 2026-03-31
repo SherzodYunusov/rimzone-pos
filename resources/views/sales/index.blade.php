@@ -84,16 +84,20 @@
             width: 100% !important;
             max-width: 100% !important;
         }
+        /* Extra bottom padding so content not hidden behind float bar + browser nav */
+        .pos-product-grid {
+            padding-bottom: calc(88px + env(safe-area-inset-bottom, 16px)) !important;
+        }
         /* Cart becomes a fixed bottom sheet */
         .pos-right {
             position: fixed !important;
             left: 0; right: 0; bottom: 0;
             width: 100% !important;
             max-width: 100% !important;
-            height: 90dvh !important;
-            z-index: 200;
+            height: 92dvh !important;
+            z-index: 250;
             border-radius: 1.25rem 1.25rem 0 0;
-            box-shadow: 0 -8px 40px rgba(0,0,0,0.18);
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.22);
             transform: translateY(100%);
             transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
             overflow: hidden;
@@ -107,6 +111,10 @@
         .pos-drag-handle { display: block; }
         /* prevent body scroll when cart is open */
         body.cart-open { overflow: hidden; }
+        /* Sidebar stays on top of everything when open */
+        aside { z-index: 600 !important; }
+        /* All action modals must be above cart (z-250) */
+        .modal-above-cart { z-index: 500 !important; }
     }
     @media (min-width: 768px) {
         .pos-right { transform: none !important; }
@@ -160,7 +168,7 @@
             </div>
 
             <!-- Product Grid -->
-            <div class="flex-1 overflow-y-auto p-3 md:p-4 pb-28 md:pb-4">
+            <div class="pos-product-grid flex-1 overflow-y-auto p-3 md:p-4 pb-28 md:pb-4">
                 <div class="grid grid-cols-2 xl:grid-cols-3 gap-2 md:gap-3">
                     <template x-for="(product, idx) in filteredProducts" :key="product.id">
                         <div class="product-card animate-fade-up rounded-xl p-3 md:p-4 flex flex-col gap-2 md:gap-3 cursor-pointer"
@@ -377,68 +385,52 @@
 
     <!-- ── MOBILE: Cart backdrop ───────────────────────────────── -->
     <div x-show="showCartMobile" style="display:none"
-         class="md:hidden fixed inset-0 z-[199] bg-slate-900/40 backdrop-blur-sm"
+         class="md:hidden fixed inset-0 z-[240] bg-slate-900/50 backdrop-blur-sm"
          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
          @click="showCartMobile = false">
     </div>
 
-    <!-- ── MOBILE: Floating bottom bar ─────────────────────────── -->
-    <div class="pos-mobile-bar fixed bottom-0 left-0 right-0 z-[150] md:hidden"
-         x-show="!showCartMobile"
-         x-transition:enter="transition ease-out duration-200"
-         x-transition:enter-start="opacity-0 translate-y-4"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-150"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 translate-y-4"
-         style="padding-bottom:env(safe-area-inset-bottom,0px)">
-
-        <!-- Cart is empty: soft minimal bar -->
-        <div x-show="cart.length === 0"
-             class="mx-4 mb-4 px-5 py-3 bg-white/90 backdrop-blur-md border border-slate-200 rounded-2xl shadow-lg flex items-center justify-between">
-            <div class="flex items-center gap-2 text-slate-400">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-                </svg>
-                <span class="text-sm font-medium">Savatcha bo'sh</span>
-            </div>
-            <span class="text-xs text-slate-300 font-medium">mahsulot tanlang</span>
-        </div>
-
-        <!-- Cart has items: full prominent bar -->
-        <div x-show="cart.length > 0"
-             class="mx-3 mb-3">
-            <button @click="showCartMobile = true"
-                class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 active:from-blue-700 active:to-indigo-700 text-white rounded-2xl shadow-xl shadow-blue-400/30 active:shadow-none active:scale-[0.98] transition-all duration-150 overflow-hidden">
-                <div class="flex items-center justify-between px-5 py-3.5">
-                    <div class="flex items-center gap-3">
-                        <div class="relative">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                            </svg>
-                            <span class="absolute -top-1.5 -right-1.5 bg-white text-blue-600 text-[9px] font-black w-4 h-4 rounded-full flex items-center justify-center"
-                                  x-text="cartCount"></span>
-                        </div>
-                        <div class="text-left">
-                            <p class="text-[10px] text-blue-200 font-medium leading-tight" x-text="cartCount + ' ta mahsulot'"></p>
-                            <p class="text-base font-black leading-tight" x-text="formatMoney(cartTotal) + ' so\'m'"></p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-1.5 bg-white/20 rounded-xl px-3 py-1.5">
-                        <span class="text-sm font-bold">Savatcha</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/>
+    <!-- ── MOBILE: Floating cart button (only shown when cart has items) ── -->
+    <div class="pos-mobile-bar fixed left-0 right-0 z-[200] md:hidden"
+         style="bottom: env(safe-area-inset-bottom, 0px); padding: 0 12px 12px 12px;"
+         x-show="cart.length > 0 && !showCartMobile"
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0 translate-y-6 scale-95"
+         x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+         x-transition:leave-end="opacity-0 translate-y-4 scale-95">
+        <button @click="showCartMobile = true"
+            class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 active:from-blue-700 active:to-indigo-700 text-white rounded-2xl shadow-2xl shadow-blue-500/40 active:shadow-none active:scale-[0.97] transition-all duration-150 overflow-hidden"
+            style="min-height: 58px;">
+            <div class="flex items-center justify-between px-5 py-3">
+                <div class="flex items-center gap-3">
+                    <div class="relative shrink-0">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
+                        <span class="absolute -top-2 -right-2 bg-white text-blue-600 text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow"
+                              x-text="cart.length"></span>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-[11px] text-blue-200 font-semibold leading-tight" x-text="cartCount + ' ta mahsulot'"></p>
+                        <p class="text-lg font-black leading-tight" x-text="formatMoney(cartTotal) + ' so\'m'"></p>
                     </div>
                 </div>
-            </button>
-        </div>
+                <div class="flex items-center gap-1.5 bg-white/20 rounded-xl px-3 py-2">
+                    <span class="text-sm font-bold">Savatcha</span>
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 15l7-7 7 7"/>
+                    </svg>
+                </div>
+            </div>
+        </button>
     </div>
 
     <!-- ── HISTORY/REPORT MODAL ────────────────────────────────── -->
     <div x-show="isHistoryOpen" style="display:none" x-cloak
-         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 modal-overlay"
+         class="modal-above-cart fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/60 modal-overlay"
          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
          
@@ -526,13 +518,13 @@
 
     <!-- ── CHECKOUT MODAL ──────────────────────────────────────── -->
     <div x-show="isSellOpen" style="display:none" x-cloak
-         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 modal-overlay"
+         class="modal-above-cart fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/60 modal-overlay"
          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
          
         <div class="absolute inset-0" @click="isSellOpen = false"></div>
 
-        <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg z-10 overflow-hidden" @click.stop
+        <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg z-10 overflow-hidden flex flex-col" style="max-height:92dvh" @click.stop
              x-transition:enter="transition ease-out duration-300" 
              x-transition:enter-start="opacity-0 scale-90 translate-y-8" 
              x-transition:enter-end="opacity-100 scale-100 translate-y-0"
@@ -572,7 +564,7 @@
             </div>
 
             <!-- Form -->
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-4 overflow-y-auto flex-1">
 
                 <!-- Tanlangan to'lov usuli (readonly ko'rsatish) -->
                 <div class="flex items-center gap-3 p-3 rounded-xl border"
@@ -677,7 +669,7 @@
 
     <!-- ── PRINT MODAL ─────────────────────────────────────────── -->
     <div x-show="showPrintModal" x-cloak style="display:none"
-         class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+         class="fixed inset-0 z-[700] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -991,6 +983,8 @@ function posApp() {
                 }
                 this.printLoading = false;
                 this.showPrintModal = false;
+                this.isSellOpen = false;
+                this.showCartMobile = false;
                 this.pendingSaleId = null;
                 this.showNotif('✓ Savdo amalga oshirildi!', 'success');
                 // iframe ni biroz keyin o'chirish (print dialog yopilishi uchun)
@@ -1000,6 +994,8 @@ function posApp() {
 
         skipPrint() {
             this.showPrintModal = false;
+            this.isSellOpen = false;
+            this.showCartMobile = false;
             this.pendingSaleId = null;
             this.showNotif('✓ Savdo amalga oshirildi!', 'success');
         },
