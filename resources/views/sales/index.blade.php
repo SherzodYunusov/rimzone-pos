@@ -14,7 +14,7 @@
         .pos-left  { height: calc(100dvh - 4rem); }
         .pos-right { height: calc(100dvh - 4rem); }
     }
-    
+
     /* Smooth animations */
     @keyframes slideInCart { from { opacity: 0; transform: translateX(12px) scale(0.98); } to { opacity: 1; transform: translateX(0) scale(1); } }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -22,26 +22,26 @@
     @keyframes bounceIn { 0% { transform: scale(0.9); opacity: 0; } 50% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
     @keyframes shimmer { 0% { background-position: -1000px 0; } 100% { background-position: 1000px 0; } }
     @keyframes glow { 0%, 100% { box-shadow: 0 0 10px rgba(59, 130, 246, 0.3); } 50% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.6); } }
-    
+
     .cart-item { animation: slideInCart 0.3s cubic-bezier(0.16, 1, 0.3, 1) both; }
     .animate-fade-up { animation: fadeUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; }
     .animate-pulse-soft.active { animation: pulseSoft 0.3s ease-out; }
     .qty-badge { animation: bounceIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-    
+
     /* Product card with gradient and smooth hover */
-    .product-card { 
-        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1); 
+    .product-card {
+        transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
         border: 1px solid rgba(226, 232, 240, 0.8);
         background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(248,250,252,0.5) 100%);
     }
-    .product-card:hover { 
-        transform: translateY(-6px); 
-        box-shadow: 0 20px 40px -8px rgba(59, 130, 246, 0.2); 
+    .product-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 40px -8px rgba(59, 130, 246, 0.2);
         border-color: rgba(96, 165, 250, 0.5);
         background: linear-gradient(135deg, rgba(255,255,255,1) 0%, rgba(240, 249, 255, 0.8) 100%);
     }
     .product-card:active { transform: translateY(-2px) scale(0.99); }
-    
+
     /* Stock indicator */
     .stock-badge {
         transition: all 0.3s ease;
@@ -51,25 +51,25 @@
         background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
         animation: glow 2s infinite;
     }
-    
+
     /* Qty buttons */
-    .qty-btn { 
+    .qty-btn {
         transition: all 0.2s cubic-bezier(0.4, 0, 1, 1);
         border-radius: 0.5rem;
     }
     .qty-btn:active { transform: scale(0.92); }
     .qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-    
+
     /* Modal smooth transitions */
     .modal-overlay {
         backdrop-filter: blur(4px);
     }
-    
+
     /* Cart showcase */
     .cart-glow {
         box-shadow: inset 0 0 20px rgba(59, 130, 246, 0.1);
     }
-    
+
     /* Smooth color transitions */
     .color-transition {
         transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
@@ -122,9 +122,9 @@
            FAB cart button  : z-200
            cart backdrop    : z-290
            cart sheet       : z-300
-           checkout modal   : z-400
-           history modal    : z-400
-           print modal      : z-500
+           history modal    : z-9999
+           checkout modal   : z-9999
+           print modal      : z-9999
            sidebar          : z-600
            notifications    : z-9999
         ─────────────────────────────────────────── */
@@ -147,6 +147,7 @@
     <div class="h-14 md:h-16 bg-gradient-to-r from-slate-50 to-blue-50 border-b border-slate-200 flex items-center justify-between px-3 md:px-6 shrink-0 sticky top-0" style="z-index:350;">
         <!-- Chap: hamburger (mobile) + POS + counter -->
         <div class="flex items-center gap-2">
+            <!-- Hamburger — LEFT side -->
             <button @click="$dispatch('open-sidebar')"
                class="md:hidden p-2 bg-white text-slate-600 active:bg-slate-100 active:scale-95 rounded-xl border border-slate-200 shadow-sm transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -187,27 +188,54 @@
             <div class="pos-product-grid flex-1 overflow-y-auto p-3 md:p-4 pb-28 md:pb-4">
                 <div class="grid grid-cols-2 xl:grid-cols-3 gap-2 md:gap-3">
                     <template x-for="(product, idx) in filteredProducts" :key="product.id">
-                        <div class="product-card animate-fade-up rounded-xl p-3 md:p-4 flex flex-col gap-2 md:gap-3 cursor-pointer"
-                             :style="`animation-delay: ${idx * 0.03}s`">
-                            <!-- Name, narx, qoldiq -->
-                            <div class="flex flex-col gap-1">
-                                <p class="text-xs md:text-sm font-bold text-slate-800 leading-snug line-clamp-2" x-text="product.name"></p>
-                                <p class="text-xs md:text-sm font-semibold text-blue-600"
-                                   x-text="formatMoney(product.price) + ' so\'m / ' + (product.unit || 'dona')"></p>
-                                <div class="flex items-center gap-1">
-                                    <span class="text-[10px] font-medium text-slate-400">Ombor:</span>
-                                    <span class="text-xs font-bold px-2 py-0.5 rounded-lg border stock-badge"
-                                          :class="parseFloat(product.quantity) <= 0
-                                            ? 'bg-red-50 text-red-600 border-red-300'
-                                            : parseFloat(product.quantity) <= 5
-                                              ? 'low bg-amber-50 text-amber-700 border-amber-300'
-                                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
-                                          x-text="parseFloat(product.quantity) + ' ' + (product.unit || 'dona')"></span>
+                        <div class="product-card animate-fade-up rounded-xl flex flex-col gap-0 cursor-pointer overflow-hidden"
+                             :style="`animation-delay: ${idx * 0.03}s`"
+                             :class="parseFloat(product.quantity) <= 0 ? 'border border-red-200' : 'border border-slate-200'">
+
+                            <!-- Nom + tugagan badge -->
+                            <div class="px-3 pt-3 pb-2 flex items-start justify-between gap-1">
+                                <p class="text-xs md:text-sm font-bold text-slate-800 leading-snug line-clamp-2 flex-1"
+                                   x-text="product.name"></p>
+                                <template x-if="parseFloat(product.quantity) === 0">
+                                    <span class="shrink-0 text-[9px] font-black bg-red-500 text-white px-1.5 py-0.5 rounded-full ml-1 whitespace-nowrap">Tugagan</span>
+                                </template>
+                                <template x-if="parseFloat(product.quantity) > 0 && parseFloat(product.quantity) <= 5">
+                                    <span class="shrink-0 text-[9px] font-bold bg-amber-100 text-amber-700 border border-amber-200 px-1.5 py-0.5 rounded-full ml-1 whitespace-nowrap">Kam!</span>
+                                </template>
+                            </div>
+
+                            <!-- Ma'lumotlar: narxi, soni, kg/litr — tannarx YO'Q -->
+                            <div class="px-3 pb-2 space-y-1 border-t border-slate-100 pt-2">
+                                <!-- Narxi -->
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] text-slate-400 font-medium">Narxi</span>
+                                    <span class="text-[11px] md:text-xs font-bold text-blue-600"
+                                          x-text="formatMoney(product.price) + ' so\'m'"></span>
                                 </div>
+                                <!-- Soni -->
+                                <div class="flex items-center justify-between">
+                                    <span class="text-[10px] text-slate-400 font-medium">Soni</span>
+                                    <span class="text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-full border stock-badge"
+                                          :class="parseFloat(product.quantity) <= 0
+                                            ? 'bg-red-50 text-red-600 border-red-200'
+                                            : parseFloat(product.quantity) <= 5
+                                              ? 'low bg-amber-50 text-amber-700 border-amber-200'
+                                              : 'bg-emerald-50 text-emerald-700 border-emerald-200'"
+                                          x-text="parseFloat(product.quantity) + ' ta'"></span>
+                                </div>
+                                <!-- Kg yoki Litr -->
+                                <template x-if="product.unit && product.unit !== 'dona' && product.unit_value && parseFloat(product.unit_value) > 0">
+                                    <div class="flex items-center justify-between">
+                                        <span class="text-[10px] text-slate-400 font-medium capitalize"
+                                              x-text="product.unit === 'kg' ? 'Kg' : 'Litr'"></span>
+                                        <span class="text-[10px] md:text-xs font-bold text-indigo-600"
+                                              x-text="parseFloat(product.unit_value) + ' ' + product.unit"></span>
+                                    </div>
+                                </template>
                             </div>
 
                             <!-- Counter -->
-                            <div class="flex items-center gap-1.5">
+                            <div class="flex items-center gap-1.5 px-3 pb-3 pt-1">
                                 <div class="flex items-center bg-slate-100 border border-slate-200 rounded-lg overflow-hidden flex-1 shadow-sm">
                                     <button @click="decrement(product.id)"
                                         class="qty-btn w-10 h-10 md:w-9 md:h-9 flex items-center justify-center text-slate-500 hover:bg-red-100 hover:text-red-600 font-bold color-transition shrink-0"
@@ -407,7 +435,7 @@
          @click="showCartMobile = false">
     </div>
 
-    <!-- ── MOBILE: FAB cart button ─────────────────────────────── -->
+    <!-- ── MOBILE: FAB cart button — faqat cart.length > 0 da ko'rinadi ── -->
     <div class="pos-cart-fab md:hidden fixed z-[200]"
          style="right:16px; bottom:calc(80px + env(safe-area-inset-bottom, 0px)); display:none;"
          x-show="cart.length > 0 && !showCartMobile"
@@ -436,17 +464,17 @@
 
     <!-- ── HISTORY/REPORT MODAL ────────────────────────────────── -->
     <div x-show="isHistoryOpen" style="display:none" x-cloak
-         class="modal-above-cart fixed inset-0 z-[400] flex items-center justify-center p-3 bg-slate-900/70 modal-overlay"
+         class="fixed inset-0 z-[9999] flex items-center justify-center p-3 bg-slate-900/70 modal-overlay"
          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-         
+
         <div class="absolute inset-0" @click="isHistoryOpen = false"></div>
 
         <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl flex flex-col z-10"
              style="max-height: 88vh;" @click.stop
              x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 scale-95" x-transition:enter-end="opacity-100 scale-100"
              x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-95">
-            
+
             <!-- Header -->
             <div class="flex items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0 bg-gradient-to-r from-blue-50 to-indigo-50">
                 <h2 class="text-xl font-bold text-slate-800 flex items-center gap-3">
@@ -459,7 +487,7 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            
+
             <!-- Content -->
             <div class="flex-1 overflow-y-auto p-6 bg-slate-50/50">
                 <div x-show="sales.length === 0" class="text-center py-12">
@@ -469,7 +497,7 @@
                     <p class="text-slate-600 font-bold text-lg">Hozircha savdolar mavjud emas.</p>
                     <p class="text-slate-400 text-sm mt-2">Satuvni boshlangu, barcha ma'lumotlar shu yerda ko'rinadi.</p>
                 </div>
-                
+
                 <div x-show="sales.length > 0" class="space-y-3">
                     <template x-for="sale in sales" :key="sale.id">
                         <div class="bg-white border border-slate-200 rounded-2xl p-5 hover:shadow-lg hover:shadow-blue-100 hover:border-blue-300 transition-all">
@@ -489,7 +517,7 @@
                                         </span>
                                     </div>
                                     <h3 class="text-base font-bold text-slate-900 mb-1 truncate" x-text="sale.customer ? sale.customer.name : '👤 Umumiy Mijoz'"></h3>
-                                    
+
                                     <!-- Items -->
                                     <div class="flex flex-wrap items-center gap-1.5 mt-2">
                                         <template x-for="item in sale.items">
@@ -500,7 +528,7 @@
                                         </template>
                                     </div>
                                 </div>
-                                
+
                                 <!-- Price & Action -->
                                 <div class="flex flex-col md:items-end justify-center shrink-0 gap-3">
                                     <div class="text-right">
@@ -522,17 +550,17 @@
         </div>
     </div>
 
-    <!-- ── CHECKOUT MODAL ──────────────────────────────────────── -->
+    <!-- ── CHECKOUT MODAL — z-[9999] qilib barcha narsadan ustida ── -->
     <div x-show="isSellOpen" style="display:none" x-cloak
-         class="modal-above-cart fixed inset-0 z-[400] flex items-center justify-center p-3 bg-slate-900/70 modal-overlay"
+         class="fixed inset-0 z-[9999] flex items-center justify-center p-3 bg-slate-900/70 modal-overlay"
          x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
          x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-         
+
         <div class="absolute inset-0" @click="isSellOpen = false"></div>
 
         <div class="relative bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg z-10 overflow-hidden flex flex-col" style="max-height:92dvh" @click.stop
-             x-transition:enter="transition ease-out duration-300" 
-             x-transition:enter-start="opacity-0 scale-90 translate-y-8" 
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 scale-90 translate-y-8"
              x-transition:enter-end="opacity-100 scale-100 translate-y-0"
              x-transition:leave="transition ease-in duration-200">
 
@@ -613,7 +641,7 @@
                         <h3 class="text-sm font-bold text-blue-900">Yangi Mijoz</h3>
                         <button type="button" @click="showNewCustomerForm = false" class="text-xs font-bold text-blue-600 hover:text-blue-700">Bekor</button>
                     </div>
-                    
+
                     <div x-show="Object.keys(sellErrors).length > 0" class="bg-red-50 border border-red-200 rounded-lg p-2">
                         <template x-for="(errors, field) in sellErrors">
                             <p class="text-xs text-red-700 font-bold" x-text="Array.isArray(errors) ? errors[0] : errors"></p>
@@ -621,14 +649,14 @@
                     </div>
 
                     <input type="text" x-model="newCustomer.name" placeholder="F.I.SH." maxlength="100" class="w-full px-3 py-2 text-sm border border-blue-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 placeholder-slate-400">
-                    
+
                     <div class="grid grid-cols-2 gap-2">
                         <input type="text" x-model="newCustomer.company_name" placeholder="Korxona" class="w-full px-3 py-2 text-sm border border-blue-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 placeholder-slate-400">
                         <input type="tel" x-model="newCustomer.phone" placeholder="+998..." class="w-full px-3 py-2 text-sm border border-blue-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 placeholder-slate-400">
                     </div>
-                    
+
                     <input type="text" x-model="newCustomer.address" placeholder="Manzil" class="w-full px-3 py-2 text-sm border border-blue-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-800 placeholder-slate-400">
-                    
+
                     <button type="button" @click="saveNewCustomer" :disabled="customerLoading" class="w-full py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all disabled:opacity-50">
                         <span x-show="!customerLoading">Saqlash va Tanlash</span>
                         <span x-show="customerLoading" class="flex items-center justify-center gap-2">
@@ -675,7 +703,7 @@
 
     <!-- ── PRINT MODAL ─────────────────────────────────────────── -->
     <div x-show="showPrintModal" x-cloak style="display:none"
-         class="fixed inset-0 z-[500] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
+         class="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm"
          x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
@@ -752,7 +780,7 @@ function posApp() {
         pendingSaleId: null,
         printLoading: false,
 
-        _qtyTimers: {},   // debounce timer handles per product id
+        _qtyTimers: {},
         totalFlash: false,
         flashCartId: null,
 
@@ -766,8 +794,8 @@ function posApp() {
         /* ─── Computed ──────────────────────────────────────────── */
         get filteredProducts() {
             const s = this.search.toLowerCase().trim();
-            return s 
-                ? this.products.filter(p => p.name.toLowerCase().includes(s)) 
+            return s
+                ? this.products.filter(p => p.name.toLowerCase().includes(s))
                 : this.products;
         },
         get cartCount() { return this.cart.reduce((sum, i) => sum + parseFloat(i.qty), 0); },
@@ -775,12 +803,12 @@ function posApp() {
 
         /* ─── Cart Methods ──────────────────────────────────────── */
         cartQty(pid) { return this.cart.find(i => i.id === pid)?.qty ?? 0; },
-        
+
         triggerPulse() {
             this.pulseCart = true;
             setTimeout(() => this.pulseCart = false, 300);
         },
-        
+
         increment(product) {
             const curr = this.cartQty(product.id);
             if (curr >= product.quantity) {
@@ -792,13 +820,12 @@ function posApp() {
             if (existing) {
                 existing.qty = parseFloat((existing.qty + step).toFixed(3));
             } else {
-                this.cart.push({ 
-                    id: product.id, 
-                    name: product.name, 
+                this.cart.push({
+                    id: product.id,
+                    name: product.name,
                     price: parseFloat(product.price),
-                    unit: product.unit || 'dona', 
+                    unit: product.unit || 'dona',
                     qty: step
-                    
                 });
             }
             this.triggerPulse();
@@ -820,7 +847,6 @@ function posApp() {
             this.triggerTotalFlash();
         },
 
-        // To'g'ridan-to'g'ri miqdor kiritish (mahsulot grid)
         setQty(product, value) {
             const v = parseFloat(value);
             if (isNaN(v) || v <= 0) { this.removeFromCart(product.id); return; }
@@ -832,7 +858,6 @@ function posApp() {
             else { this.cart.push({ id: product.id, name: product.name, price: parseFloat(product.price), unit: product.unit || 'dona', qty: parseFloat(capped.toFixed(3)) }); }
         },
 
-        // Savatchadagi item uchun miqdor kiritish (ID bo'yicha)
         setQtyById(pid, value) {
             const v = parseFloat(value);
             const idx = this.cart.findIndex(i => i.id === pid);
@@ -841,7 +866,6 @@ function posApp() {
             this.cart[idx].qty = parseFloat(v.toFixed(3));
         },
 
-        // Savatchadagi item uchun +step (ID bo'yicha)
         incrementById(pid) {
             const idx = this.cart.findIndex(i => i.id === pid);
             if (idx !== -1) {
@@ -851,7 +875,6 @@ function posApp() {
             }
         },
 
-        // Debounced version for @input on product grid qty field
         debouncedSetQty(product, value) {
             clearTimeout(this._qtyTimers[product.id]);
             this._qtyTimers[product.id] = setTimeout(() => {
@@ -861,7 +884,6 @@ function posApp() {
             }, 300);
         },
 
-        // Debounced version for @input on cart item qty field
         debouncedSetQtyById(pid, value) {
             clearTimeout(this._qtyTimers['c_' + pid]);
             this._qtyTimers['c_' + pid] = setTimeout(() => {
@@ -871,13 +893,11 @@ function posApp() {
             }, 300);
         },
 
-        // Brief green flash on total sum row
         triggerTotalFlash() {
             this.totalFlash = true;
             setTimeout(() => { this.totalFlash = false; }, 650);
         },
 
-        // Brief green flash on a specific cart item row
         triggerFlash(pid) {
             this.flashCartId = pid;
             setTimeout(() => { this.flashCartId = null; }, 650);
@@ -886,9 +906,9 @@ function posApp() {
         removeFromCart(pid) {
             this.cart = this.cart.filter(i => i.id !== pid);
         },
-        
-        clearCart() { 
-            this.cart = []; 
+
+        clearCart() {
+            this.cart = [];
         },
 
         /* ─── Sell ──────────────────────────────────────────────── */
@@ -901,7 +921,6 @@ function posApp() {
             this.isSellOpen = true;
         },
 
-        
         confirmSell() {
             this.sellErrors = {};
             if (!this.sellForm.sale_date) {
@@ -928,21 +947,21 @@ function posApp() {
 
             fetch('/sales', {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json', 
+                headers: {
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify(payload)
             })
-            .then(async r => { 
-                const d = await r.json(); 
+            .then(async r => {
+                const d = await r.json();
                 if (r.status === 422) {
                     this.sellErrors = d.errors || { general: d.message };
                     throw new Error('Validation error');
                 }
-                if (!r.ok) throw new Error(d.message || 'Xatolik yuz berdi'); 
-                return d; 
+                if (!r.ok) throw new Error(d.message || 'Xatolik yuz berdi');
+                return d;
             })
             .then(d => {
                 if (d.success) {
@@ -954,7 +973,6 @@ function posApp() {
                     this.clearCart();
                     this.isSellOpen = false;
                     this.showCartMobile = false;
-                    // Chek modal ochish
                     this.pendingSaleId = d.sale.id;
                     this.showPrintModal = true;
                 }
@@ -970,7 +988,6 @@ function posApp() {
             if (!this.pendingSaleId) return;
             this.printLoading = true;
 
-            // Eski iframe bo'lsa o'chirish
             const old = document.getElementById('receipt-iframe');
             if (old) old.remove();
 
@@ -985,7 +1002,6 @@ function posApp() {
                     iframe.contentWindow.focus();
                     iframe.contentWindow.print();
                 } catch(e) {
-                    // Fallback: yangi tabda ochish
                     window.open('/receipts/' + this.pendingSaleId, '_blank');
                 }
                 this.printLoading = false;
@@ -994,7 +1010,6 @@ function posApp() {
                 this.showCartMobile = false;
                 this.pendingSaleId = null;
                 this.showNotif('✓ Savdo amalga oshirildi!', 'success');
-                // iframe ni biroz keyin o'chirish (print dialog yopilishi uchun)
                 setTimeout(() => { iframe.remove(); }, 3000);
             };
         },
@@ -1011,19 +1026,19 @@ function posApp() {
         deleteSaleHistory(id) {
             if(!confirm("Bu savdoni o'chirib tashlaysizmi? Mahsulotlar omborga qaytariladi.")) return;
             this.isDeletingId = id;
-            
+
             fetch(`/sales/${id}`, {
                 method: 'DELETE',
-                headers: { 
-                    'Content-Type': 'application/json', 
+                headers: {
+                    'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content 
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 }
             })
-            .then(async r => { 
-                const d = await r.json(); 
-                if (!r.ok) throw new Error(d.message); 
-                return d; 
+            .then(async r => {
+                const d = await r.json();
+                if (!r.ok) throw new Error(d.message);
+                return d;
             })
             .then(d => {
                 if(d.success) {
@@ -1031,8 +1046,8 @@ function posApp() {
                     if (sale) {
                         sale.items.forEach(item => {
                             const p = this.products.find(pr => pr.id === item.product_id);
-                            if (p) { 
-                                p.quantity = parseInt(p.quantity) + parseInt(item.quantity); 
+                            if (p) {
+                                p.quantity = parseInt(p.quantity) + parseInt(item.quantity);
                             } else if (item.product) {
                                 this.products.push({
                                     id: item.product_id,
@@ -1059,27 +1074,27 @@ function posApp() {
             }
             this.customerLoading = true;
             this.sellErrors = {};
-            
+
             const fd = new FormData();
             fd.append('name', this.newCustomer.name);
             fd.append('company_name', this.newCustomer.company_name);
             fd.append('phone', this.newCustomer.phone);
             fd.append('address', this.newCustomer.address);
             fd.append('_token', document.querySelector('meta[name="csrf-token"]').content);
-            
+
             fetch('/customers', {
                 method: 'POST',
                 headers: { 'Accept': 'application/json' },
                 body: fd
             })
-            .then(async r => { 
-                const d = await r.json(); 
+            .then(async r => {
+                const d = await r.json();
                 if (r.status === 422) {
                     this.sellErrors = d.errors || { general: d.message };
                     throw new Error('Validation error');
                 }
-                if (!r.ok) throw new Error(d.message || "Xatolik yuz berdi"); 
-                return d; 
+                if (!r.ok) throw new Error(d.message || "Xatolik yuz berdi");
+                return d;
             })
             .then(data => {
                 if(data.success) {
@@ -1100,34 +1115,34 @@ function posApp() {
         formatMoney(n) {
             return Number(n || 0).toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
         },
-        
+
         formatDate(d) {
             if (!d) return '';
             const dt = new Date(d);
             return `${String(dt.getDate()).padStart(2,'0')}.${String(dt.getMonth()+1).padStart(2,'0')}.${dt.getFullYear()}`;
         },
-        
+
         showNotif(msg, type) {
             const isSuccess = type === 'success';
             const el = document.createElement('div');
-            el.className = `fixed bottom-6 right-6 px-6 py-4 rounded-xl border shadow-2xl text-sm font-bold z-[9999] transition-all duration-500 transform translate-y-24 opacity-0 flex items-center gap-3 min-w-[320px] backdrop-blur-sm backdrop-blur-sm ${
-                isSuccess 
-                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800' 
+            el.className = `fixed bottom-6 right-6 px-6 py-4 rounded-xl border shadow-2xl text-sm font-bold z-[9999] transition-all duration-500 transform translate-y-24 opacity-0 flex items-center gap-3 min-w-[320px] backdrop-blur-sm ${
+                isSuccess
+                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
                     : 'bg-red-50 border-red-200 text-red-800'
             }`;
-            
-            const icon = isSuccess 
+
+            const icon = isSuccess
                 ? '<svg class="w-5 h-5 text-emerald-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>'
                 : '<svg class="w-5 h-5 text-red-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12"/></svg>';
-            
+
             el.innerHTML = `${icon}<span>${msg}</span>`;
             document.body.appendChild(el);
-            
+
             setTimeout(() => { el.classList.remove('translate-y-24', 'opacity-0'); }, 10);
-            
-            setTimeout(() => { 
+
+            setTimeout(() => {
                 el.classList.add('translate-y-24', 'opacity-0');
-                setTimeout(() => el.remove(), 500); 
+                setTimeout(() => el.remove(), 500);
             }, 4500);
         }
     };
