@@ -793,7 +793,7 @@ function posApp() {
                 existing.qty = parseFloat((existing.qty + step).toFixed(3));
             } else {
                 this.cart.push({
-                    id: product.id,
+                    id: product.id, 
                     name: product.name, 
                     price: parseFloat(product.price),
                     unit: product.unit || 'dona', 
