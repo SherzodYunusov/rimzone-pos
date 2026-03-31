@@ -794,7 +794,7 @@ function posApp() {
             } else {
                 this.cart.push({
                     id: product.id,
-                    name: product.name,
+                    name: product.name, 
                     price: parseFloat(product.price),
                     unit: product.unit || 'dona', 
                     qty: step
