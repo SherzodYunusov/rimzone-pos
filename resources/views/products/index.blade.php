@@ -255,26 +255,41 @@
 
             <!-- Body -->
             <div class="p-4 sm:p-6 space-y-4 max-h-[75dvh] overflow-y-auto">
+                <!-- 1. Nom -->
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1.5">Mahsulot nomi <span class="text-red-500">*</span></label>
                     <input type="text" x-model="form.name" placeholder="Masalan: Shampun..."
                         class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400">
                     <p x-show="errors.name" class="text-red-500 text-xs mt-1" x-text="errors.name"></p>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1.5">Sotish narxi (so'm) <span class="text-red-500">*</span></label>
-                        <input type="number" step="0.01" inputmode="decimal" x-model="form.price" placeholder="0"
-                            class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
-                        <p x-show="errors.price" class="text-red-500 text-xs mt-1" x-text="errors.price"></p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1.5">Tannarx (so'm) <span class="text-slate-400">(ixtiyoriy)</span></label>
-                        <input type="number" step="0.01" inputmode="decimal" x-model="form.cost_price" placeholder="0"
-                            class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
-                    </div>
+                <!-- 2. Sotish narxi -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1.5">Sotish narxi (so'm) <span class="text-red-500">*</span></label>
+                    <input type="number" step="0.01" inputmode="decimal" x-model="form.price" placeholder="0"
+                        class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
+                    <p x-show="errors.price" class="text-red-500 text-xs mt-1" x-text="errors.price"></p>
                 </div>
-                <!-- O'lchov birligi -->
+                <!-- 3. Tannarx -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1.5">Tannarx (so'm) <span class="text-slate-400">(ixtiyoriy)</span></label>
+                    <input type="number" step="0.01" inputmode="decimal" x-model="form.cost_price" placeholder="0"
+                        class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
+                </div>
+                <!-- 4. Soni -->
+                <div>
+                    <label class="block text-xs font-medium text-slate-600 mb-1.5">
+                        Ombordagi soni
+                        (<span x-text="form.unit || 'dona'"></span>)
+                        <span class="text-red-500">*</span>
+                    </label>
+                    <input type="number"
+                        :step="(form.unit === 'kg' || form.unit === 'litr') ? '0.001' : '1'"
+                        :inputmode="(form.unit === 'kg' || form.unit === 'litr') ? 'decimal' : 'numeric'"
+                        x-model="form.quantity" placeholder="0"
+                        class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
+                    <p x-show="errors.quantity" class="text-red-500 text-xs mt-1" x-text="errors.quantity"></p>
+                </div>
+                <!-- 5. O'lchov birligi -->
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1.5">O'lchov birligi <span class="text-red-500">*</span></label>
                     <div class="grid grid-cols-3 gap-2">
@@ -290,33 +305,15 @@
                     </div>
                     <p x-show="errors.unit" class="text-red-500 text-xs mt-1" x-text="errors.unit"></p>
                 </div>
-
-                <!-- Soni (dona uchun) -->
-                <div x-show="form.unit === 'dona'">
-                    <label class="block text-xs font-medium text-slate-600 mb-1.5">Ombordagi soni (dona) <span class="text-red-500">*</span></label>
-                    <input type="number" step="1" inputmode="numeric" x-model="form.quantity" placeholder="0"
+                <!-- unit_value: only for kg/litr -->
+                <div x-show="form.unit === 'kg' || form.unit === 'litr'">
+                    <label class="block text-xs font-medium text-slate-600 mb-1.5">
+                        1 donasi necha <span x-text="form.unit"></span> <span class="text-slate-400">(ixtiyoriy)</span>
+                    </label>
+                    <input type="number" step="0.001" inputmode="decimal" x-model="form.unit_value" placeholder="0"
                         class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
-                    <p x-show="errors.quantity" class="text-red-500 text-xs mt-1" x-text="errors.quantity"></p>
                 </div>
-
-                <!-- Soni + unit_value (kg/litr uchun) -->
-                <div x-show="form.unit === 'kg' || form.unit === 'litr'" class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1.5">
-                            Ombordagi miqdor (<span x-text="form.unit"></span>) <span class="text-red-500">*</span>
-                        </label>
-                        <input type="number" step="0.001" inputmode="decimal" x-model="form.quantity" placeholder="0"
-                            class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
-                        <p x-show="errors.quantity" class="text-red-500 text-xs mt-1" x-text="errors.quantity"></p>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-600 mb-1.5">
-                            1 donasi necha <span x-text="form.unit"></span> <span class="text-slate-400">(ixtiyoriy)</span>
-                        </label>
-                        <input type="number" step="0.001" inputmode="decimal" x-model="form.unit_value" placeholder="0"
-                            class="w-full px-3 py-3 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700">
-                    </div>
-                </div>
+                <!-- 6. Tavsif -->
                 <div>
                     <label class="block text-xs font-medium text-slate-600 mb-1.5">Tavsif <span class="text-slate-400">(ixtiyoriy)</span></label>
                     <textarea x-model="form.description" placeholder="Mahsulot haqida qisqacha..."
