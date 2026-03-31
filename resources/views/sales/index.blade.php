@@ -797,7 +797,7 @@ function posApp() {
                     id: product.id,
                     name: product.name,
                     price: parseFloat(product.price),
-                    unit: product.unit || 'dona',
+                    unit: product.unit || 'dona', 
                     qty: step
                 });
             }
