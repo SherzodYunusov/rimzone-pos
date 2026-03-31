@@ -792,12 +792,13 @@ function posApp() {
             if (existing) {
                 existing.qty = parseFloat((existing.qty + step).toFixed(3));
             } else {
-                this.cart.push({
+                this.cart.push({ 
                     id: product.id, 
                     name: product.name, 
                     price: parseFloat(product.price),
                     unit: product.unit || 'dona', 
                     qty: step
+                    
                 });
             }
             this.triggerPulse();
