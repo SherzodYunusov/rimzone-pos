@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Sale;
+use App\Models\SaleItem;
+use App\Models\SalePayment;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -136,6 +138,30 @@ class ReportController extends Controller
             'allDebtSales', 'totalNasiya', 'overdueNasiya', 'today',
             'totalCollectedDebt', 'biggestDebtor'
         ));
+    }
+
+    /**
+     * BARCHA savdolarni o'chirish va mahsulotlar sonini 0 ga tushirish.
+     * Faqat topshirish oldidan ishlatiladi!
+     */
+    public function resetAll(Request $request)
+    {
+        $confirm = $request->input('confirm');
+        if ($confirm !== 'TASDIQLASH') {
+            return response()->json(['success' => false, 'message' => 'Tasdiqlash kodi noto\'g\'ri.'], 422);
+        }
+
+        DB::transaction(function () {
+            \App\Models\SalePayment::query()->delete();
+            \App\Models\SaleItem::query()->delete();
+            Sale::query()->delete();
+            Product::query()->update(['quantity' => 0]);
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Barcha savdolar o\'chirildi va mahsulotlar soni 0 ga tushirildi.',
+        ]);
     }
 
     /**
