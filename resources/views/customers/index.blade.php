@@ -10,18 +10,28 @@
 <div x-data="customerApp()" x-init="init()">
 
     <!-- Page Header -->
-    <div class="h-14 md:h-16 bg-white border-b border-slate-200 flex items-center justify-between px-4 md:px-8">
-        <div>
-            <h1 class="text-lg font-semibold text-slate-800">Mijozlar</h1>
-            <p class="text-xs text-slate-400" x-text="`${customers.length} ta mijoz`"></p>
+    <div class="bg-white border-b border-slate-200 px-4 md:px-8">
+        <div class="h-14 md:h-16 flex items-center justify-between gap-3">
+            <div class="shrink-0">
+                <h1 class="text-lg font-semibold text-slate-800">Mijozlar</h1>
+                <p class="text-xs text-slate-400" x-text="`${filteredCustomers.length} ta mijoz`"></p>
+            </div>
+            <!-- Qidiruv -->
+            <div class="flex-1 max-w-xs relative">
+                <svg class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                </svg>
+                <input type="text" x-model="search" placeholder="Ism yoki telefon..."
+                    class="w-full pl-8 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-700 placeholder-slate-400 transition-all">
+            </div>
+            <button @click="openAddModal()"
+                class="shrink-0 inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-3 md:px-4 rounded-lg transition-colors shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span class="hidden sm:inline">Qo'shish</span>
+            </button>
         </div>
-        <button @click="openAddModal()"
-            class="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium text-sm py-2 px-3 md:px-4 rounded-lg transition-colors shadow-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-            </svg>
-            <span class="hidden sm:inline">Mijoz qo'shish</span>
-        </button>
     </div>
 
     <!-- Main -->
@@ -47,7 +57,7 @@
 
         <!-- Customers Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-3 md:gap-4">
-            <template x-for="(customer, index) in customers" :key="customer.id">
+            <template x-for="(customer, index) in filteredCustomers" :key="customer.id">
                 <div class="bg-white border border-slate-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden flex flex-col"
                      :style="`animation: fadeInUp .3s ease both; animation-delay: ${index * 40}ms`">
 
@@ -393,6 +403,17 @@ function initCustomerMap(customerId, lat, lng) {
 function customerApp() {
     return {
         customers: {!! json_encode($customers) !!},
+        search: '',
+
+        get filteredCustomers() {
+            const q = this.search.trim().toLowerCase();
+            if (!q) return this.customers;
+            return this.customers.filter(c =>
+                c.name.toLowerCase().includes(q) ||
+                (c.phone && c.phone.toLowerCase().includes(q))
+            );
+        },
+
         isFormOpen: false,
         isDeleteOpen: false,
         loading: false,
