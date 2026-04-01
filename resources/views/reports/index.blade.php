@@ -34,7 +34,7 @@
 
         {{-- ── MOBILE layout (< md): 2 rows ─────────────────────────── --}}
         <div class="md:hidden">
-            {{-- Row 1: Title + Reset button --}}
+            {{-- Row 1: Title --}}
             <div class="flex items-center justify-between mb-2">
                 <div>
                     <h1 class="text-base font-black text-slate-800 leading-tight">Hisobotlar</h1>
@@ -43,11 +43,6 @@
                         @if($startDate !== $endDate) — {{ \Carbon\Carbon::parse($endDate)->format('d.m.Y') }} @endif
                     </p>
                 </div>
-                <button @click="showResetModal=true"
-                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-xl hover:bg-red-600 hover:text-white hover:border-red-600 transition-all">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                    Tozalash
-                </button>
             </div>
             {{-- Row 2: Full-width filter form --}}
             <form action="{{ url('/reports') }}" method="GET" class="flex items-center gap-2">
@@ -85,11 +80,6 @@
                     <span class="text-xs font-bold">Filter</span>
                 </button>
             </form>
-            <button @click="showResetModal=true"
-                class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-red-600 bg-red-50 border border-red-200 rounded-xl hover:bg-red-600 hover:text-white hover:border-red-600 transition-all shrink-0">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                Hammasini tozalash
-            </button>
         </div>
 
     </div>
@@ -525,11 +515,6 @@
                                         <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                         To'lov
                                     </button>
-                                    <button onclick="deleteSale({{ $debtSale->id }}, '#{{ $debtSale->id }}')"
-                                        class="inline-flex items-center justify-center w-7 h-7 rounded-xl text-red-400 bg-white border border-red-200 hover:bg-red-600 hover:text-white hover:border-red-600 transition-all"
-                                        title="O'chirish">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </button>
                                 </div>
                             </td>
                         </tr>
@@ -759,18 +744,11 @@
                                 <td class="px-5 py-2.5 text-right text-sm font-black text-emerald-600">{{ number_format($item->unit_price * $item->quantity,0,',',' ') }}</td>
                                 <td class="px-5 py-2.5 text-right align-top">
                                     @if($idx === 0)
-                                    <div class="flex items-center justify-end gap-1">
                                     <button onclick="printSaleReceipt({{ $sale->id }})"
                                         title="Chek chiqarish"
                                         class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-slate-400 bg-white border border-slate-200 hover:text-blue-600 hover:bg-blue-50 hover:border-blue-200 transition-all">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                                     </button>
-                                    <button onclick="deleteSale({{ $sale->id }}, '#{{ $sale->id }}')"
-                                        title="O'chirish"
-                                        class="inline-flex items-center justify-center w-7 h-7 rounded-lg text-red-400 bg-white border border-red-200 hover:text-white hover:bg-red-600 hover:border-red-600 transition-all">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                    </button>
-                                    </div>
                                     @endif
                                 </td>
                             </tr>
@@ -805,71 +783,6 @@
     </div>
 
 </main>
-
-{{-- ══ HAMMASINI TOZALASH MODALI ════════════════════════════════════════ --}}
-<div x-show="showResetModal" x-cloak
-     class="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
-     x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
-     x-transition:leave="transition ease-in duration-150" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-    <div class="absolute inset-0" @click="if(!resetLoading){ showResetModal=false; resetConfirmText=''; }"></div>
-    <div class="relative bg-white rounded-2xl shadow-2xl border border-red-200 w-full max-w-md overflow-hidden z-10" @click.stop
-         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 scale-90 translate-y-6" x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 scale-100" x-transition:leave-end="opacity-0 scale-90">
-
-        {{-- Header --}}
-        <div class="bg-gradient-to-r from-red-600 to-red-700 px-6 py-4 flex items-center gap-3">
-            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center shrink-0">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-            </div>
-            <div>
-                <h3 class="text-base font-black text-white">Hammasini tozalash</h3>
-                <p class="text-xs text-red-200">Bu amalni qaytarib bo'lmaydi!</p>
-            </div>
-        </div>
-
-        {{-- Body --}}
-        <div class="p-6 space-y-4">
-            <div class="bg-red-50 border border-red-200 rounded-xl p-4 space-y-1.5">
-                <p class="text-sm font-bold text-red-700">Quyidagilar o'chiriladi:</p>
-                <ul class="text-sm text-red-600 space-y-1">
-                    <li class="flex items-center gap-2"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Barcha savdolar tarixi</li>
-                    <li class="flex items-center gap-2"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Barcha nasiya to'lovlari</li>
-                    <li class="flex items-center gap-2"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg> Mahsulotlar soni → 0</li>
-                </ul>
-                <p class="text-xs text-red-500 pt-1">Mahsulot ro'yxati va mijozlar saqlanib qoladi.</p>
-            </div>
-
-            <div>
-                <label class="block text-sm font-bold text-slate-700 mb-2">
-                    Tasdiqlash uchun <span class="font-black text-red-600 font-mono">TASDIQLASH</span> deb yozing:
-                </label>
-                <input x-model="resetConfirmText"
-                    type="text"
-                    placeholder="TASDIQLASH"
-                    :disabled="resetLoading"
-                    class="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-red-400 focus:ring-2 focus:ring-red-100 outline-none text-sm font-mono font-bold text-center tracking-widest transition-all"
-                    @keyup.enter="submitReset()">
-            </div>
-        </div>
-
-        {{-- Footer --}}
-        <div class="px-6 pb-6 flex items-center gap-3">
-            <button @click="showResetModal=false; resetConfirmText=''" :disabled="resetLoading"
-                class="flex-1 py-2.5 rounded-xl text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 border border-slate-200 transition-all">
-                Bekor qilish
-            </button>
-            <button @click="submitReset()"
-                :disabled="resetLoading || resetConfirmText !== 'TASDIQLASH'"
-                :class="resetConfirmText === 'TASDIQLASH' && !resetLoading ? 'bg-red-600 hover:bg-red-700 text-white border-red-600' : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'"
-                class="flex-1 py-2.5 rounded-xl text-sm font-bold border transition-all flex items-center justify-center gap-2">
-                <span x-show="resetLoading">
-                    <svg class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
-                </span>
-                <span x-text="resetLoading ? 'Tozalanmoqda...' : 'Hammasini o\'chir'"></span>
-            </button>
-        </div>
-    </div>
-</div>
 
 {{-- ══ QARZNI YOPISH MODALI ═══════════════════════════════════════════ --}}
 <div x-show="payModal.open" x-cloak
@@ -959,37 +872,6 @@ document.addEventListener('alpine:init', () => {
         activeTab: 'overview',
         debtFilter: 'all',
         openHistoryId: null,
-        showResetModal: false,
-        resetConfirmText: '',
-        resetLoading: false,
-
-        async submitReset() {
-            if (this.resetConfirmText !== 'TASDIQLASH') {
-                alert('Iltimos, "TASDIQLASH" so\'zini to\'g\'ri yozing!');
-                return;
-            }
-            this.resetLoading = true;
-            try {
-                const resp = await fetch('/reports/reset-all', {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    },
-                    body: JSON.stringify({ confirm: 'TASDIQLASH' }),
-                });
-                const data = await resp.json();
-                if (data.success) {
-                    this.showResetModal = false;
-                    alert('✓ ' + data.message);
-                    window.location.reload();
-                } else {
-                    alert(data.message || 'Xatolik yuz berdi!');
-                }
-            } catch (e) { alert('Xatolik: ' + e.message); }
-            finally { this.resetLoading = false; }
-        },
 
         payModal: {
             open: false, saleId: null, customerName: '',
@@ -1044,17 +926,6 @@ document.addEventListener('alpine:init', () => {
         },
     }));
 });
-
-function deleteSale(saleId, label) {
-    if (!confirm((label ? label + ' — ' : '') + 'Bu savdoni o\'chirmoqchimisiz?\nMahsulotlar omborga qaytariladi.')) return;
-    fetch('/sales/' + saleId, {
-        method: 'DELETE',
-        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content, 'Accept': 'application/json' }
-    })
-    .then(r => r.json())
-    .then(d => { if (d.success) { window.location.reload(); } else { alert(d.message || 'Xatolik yuz berdi'); } })
-    .catch(() => alert('Tarmoq xatosi'));
-}
 
 function printSaleReceipt(saleId) {
     const old = document.getElementById('report-receipt-iframe');
